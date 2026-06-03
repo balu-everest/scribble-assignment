@@ -93,19 +93,18 @@ As the system, I want to ensure that all player names stored during active gamep
 - **FR-002**: The system MUST reject game start requests from non-host participants.
 - **FR-003**: When the host starts the game, the room state MUST transition from 'lobby' to 'active'.
 - **FR-004**: The system MUST reject game start if the room is already in an 'active' state.
-- **FR-005**: The frontend MUST periodically poll (approximately every 2 seconds) for room state updates while on the lobby screen.
+- **FR-005**: The frontend MUST poll every 2 seconds (±500ms) for room state updates while on the lobby screen.
 - **FR-006**: When the frontend detects the room state has changed to 'active', it MUST automatically navigate the user to the game screen.
 - **FR-007**: Player names MUST be trimmed of leading and trailing whitespace upon room entry.
 - **FR-008**: Player names that are empty or contain only whitespace after trimming MUST be rejected upon room entry.
-- **FR-009**: Upon game start, the system MUST deterministically designate one player as the 'drawer' and all other participants as 'guessers'.
-- **FR-010**: The host (or first player in the room) MUST be designated as the drawer upon game start.
-- **FR-011**: Upon game start, the system MUST deterministically select a secret word from the predefined list: [rocket, pizza, castle, guitar, sunflower].
-- **FR-012**: The secret word MUST only be visible to the drawer. Guessers MUST NOT be able to see the secret word through any means.
-- **FR-013**: The system MUST include each player's assigned role (drawer or guesser) in the room state response. All participants' roles MUST be visible to all players in the room (roles are public).
+- **FR-009**: Upon game start, the system MUST deterministically designate one player as the 'drawer' and all other participants as 'guessers'. The host (first player in the room) MUST be designated as the drawer — all others as guessers.
+- **FR-010**: Upon game start, the system MUST deterministically select a secret word from the predefined list: [rocket, pizza, castle, guitar, sunflower].
+- **FR-011**: The secret word MUST only be visible to the drawer. Guessers MUST NOT be able to see the secret word through any means.
+- **FR-012**: The system MUST include each player's assigned role (drawer or guesser) in the room state response. All participants' roles MUST be visible to all players in the room (roles are public).
 
 ### Key Entities *(include if feature involves data)*
 
-- **Room**: Represents a game session with a unique code. Has a state ('lobby' or 'active'), a list of participants, the host identifier, and the current round's secret word (only exposed to the drawer).
+- **Room**: Represents a game session with a unique code. Has a state ('lobby' or 'active'), a list of participants, the host identifier, the drawer's participant identifier, and the current round's secret word (only exposed to the drawer).
 - **Player**: A participant in a room. Has a name (trimmed, non-empty), a unique identifier, and a role ('drawer' or 'guesser') assigned upon game start.
 - **Secret Word**: A word selected from a predefined list at game start, known only to the drawer. Used as the subject for the drawing round.
 

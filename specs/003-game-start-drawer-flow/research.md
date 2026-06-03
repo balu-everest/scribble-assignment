@@ -24,7 +24,7 @@
 
 **Decision**: On game start, iterate participants. The participant matching `room.hostId` is assigned role `"drawer"`. All other participants get role `"guesser"`. Roles are stored as a `role` field on each `Participant` object with type `"drawer" | "guesser"`.
 
-**Rationale**: Deterministic (host is always first player per spec), simple one-pass assignment. Storing role on `Participant` means the existing `participants[]` array naturally carries role info, and FR-013 (all roles public) is trivially satisfied by returning the array as-is.
+**Rationale**: Deterministic (host is always first player per spec), simple one-pass assignment. Storing role on `Participant` means the existing `participants[]` array naturally carries role info, and FR-012 (all roles public) is trivially satisfied by returning the array as-is.
 
 **Alternatives considered**: Separate `roleMap: Map<participantId, role>` (fragile, needs sync with participants), computed role on read (no persistence, can't detect role changes).
 

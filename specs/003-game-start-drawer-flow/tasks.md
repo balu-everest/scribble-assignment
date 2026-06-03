@@ -93,7 +93,7 @@ No tasks in this phase.
 
 ### Implementation for User Story 3
 
-- [ ] T013 [P] [US3] Add 2-second polling `setInterval` calling `roomStore.fetchRoom()` on GamePage mount, clear interval on unmount in `frontend/src/pages/GamePage.tsx`
+- [ ] T013 [P] [US3] Add 2-second polling `setInterval` calling `roomStore.fetchRoom()` on GamePage mount, clear interval on unmount. On network error: silently preserve last known state. On 404: navigate back to home in `frontend/src/pages/GamePage.tsx`
 - [ ] T014 [US3] Display: viewer's role ("drawer" / "guesser"), secretWord (only if drawer), drawer's name prominently; show "Waiting for the drawer to draw..." for guessers in `frontend/src/pages/GamePage.tsx`
 
 **Checkpoint**: Game screen shows role-appropriate information with viewer-scoped secret word.

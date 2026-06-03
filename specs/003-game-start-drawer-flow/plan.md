@@ -37,7 +37,7 @@ Implement Game Start & Drawer Flow (Scenario 2) — HTTP endpoint for host to tr
 | **In-Memory State Only** | ✅ PASS | Room state stays in `Map<string, Room>` — no DB needed for game start transition |
 | **Polling Synchronization** | ✅ PASS | FR-005/FR-006 mandate 2s HTTP polling for lobby→game routing; no WebSockets |
 | **Fail-Fast Validation** | ✅ PASS | FR-007/FR-008 enforce trim + reject empty/whitespace names; Zod schemas already in place |
-| **Viewer-Specific Security** | ✅ PASS | FR-012 (secret word hidden from guessers) enforced per-request filtering |
+| **Viewer-Specific Security** | ✅ PASS | FR-011 (secret word hidden from guessers) enforced per-request filtering |
 | **Testing Disciplines** | ✅ PASS | Deterministic word selection and role assignment verifiable with hardcoded inputs |
 | **Read-Before-Write** | ✅ PASS | Extends existing `roomStore`, `rooms.ts`, `game.ts`, `LobbyPage`, `GamePage`, `roomStore.ts` |
 | **Spec-First Alignment** | ✅ PASS | Spec committed before planning begins |
