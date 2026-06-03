@@ -24,7 +24,7 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Verify current git branch is `005-game-result-restart` and all previous feature tests pass
+- [X] T001 Verify current git branch is `005-game-result-restart` and all previous feature tests pass
 
 **Checkpoint**: Ready to begin implementation
 
@@ -36,7 +36,7 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T002 Extend RoomStatus type to include `"result"` in `backend/src/models/game.ts`
+- [X] T002 Extend RoomStatus type to include `"result"` in `backend/src/models/game.ts`
 
 **Checkpoint**: Foundation ready — the `'result'` state exists across the system
 
@@ -50,12 +50,12 @@
 
 ### Implementation for User Story 1
 
-- [ ] T003 [US1] Update `submitGuess()` in `backend/src/services/roomStore.ts` to set `room.status = "result"` when a correct guess is processed
-- [ ] T004 [US1] Update guess rejection error message for rooms in `"result"` state in `backend/src/services/roomStore.ts`
-- [ ] T005 [P] [US1] Update `RoomSnapshot` type on frontend to include `"result"` in `frontend/src/services/api.ts`
-- [ ] T006 [P] [US1] Add room status change observation in frontend room store at `frontend/src/state/roomStore.ts`
-- [ ] T007 [US1] Create `PollingRouter` component that auto-navigates to `/result` when status becomes `"result"` in `frontend/src/components/PollingRouter.tsx`
-- [ ] T008 [US1] Mount `PollingRouter` in the app layout so status changes are detected on all screens
+- [X] T003 [US1] Update `submitGuess()` in `backend/src/services/roomStore.ts` to set `room.status = "result"` when a correct guess is processed
+- [X] T004 [US1] Update guess rejection error message for rooms in `"result"` state in `backend/src/services/roomStore.ts`
+- [X] T005 [P] [US1] Update `RoomSnapshot` type on frontend to include `"result"` in `frontend/src/services/api.ts`
+- [X] T006 [P] [US1] Add room status change observation in frontend room store at `frontend/src/state/roomStore.ts`
+- [X] T007 [US1] Create `PollingRouter` component that auto-navigates to `/result` when status becomes `"result"` in `frontend/src/components/PollingRouter.tsx`
+- [X] T008 [US1] Mount `PollingRouter` in the app layout so status changes are detected on all screens
 
 **Checkpoint**: Submitting a correct guess triggers result state and routes all participants to `/result`
 
@@ -69,10 +69,10 @@
 
 ### Implementation for User Story 2
 
-- [ ] T009 [P] [US2] Create `ResultScreen` page component at `frontend/src/pages/ResultScreen.tsx` that reads room state and renders all participants with scores
-- [ ] T010 [US2] Add `/result` route in the app router configuration
-- [ ] T011 [US2] Implement winner highlight logic on Result Screen — find max score, apply visual distinction to player(s) with that score
-- [ ] T012 [US2] Implement zero-score message ("No correct guesses were made") and non-host waiting message ("Waiting for host to restart the game...") on Result Screen per FR-014 and clarification
+- [X] T009 [P] [US2] Create `ResultScreen` page component at `frontend/src/pages/ResultScreen.tsx` that reads room state and renders all participants with scores
+- [X] T010 [US2] Add `/result` route in the app router configuration
+- [X] T011 [US2] Implement winner highlight logic on Result Screen — find max score, apply visual distinction to player(s) with that score
+- [X] T012 [US2] Implement zero-score message ("No correct guesses were made") and non-host waiting message ("Waiting for host to restart the game...") on Result Screen per FR-014 and clarification
 
 **Checkpoint**: Result Screen shows all data correctly with winner highlighted and appropriate messages for all states
 
@@ -86,16 +86,16 @@
 
 ### Backend Tests for User Story 3
 
-- [ ] T013 [P] [US3] Write unit tests for `restartRoom()` in `backend/src/services/roomStore.test.ts`: successful restart resets all state (status, scores, guesses), preserves participant list, rejects non-host with 403, rejects wrong-state (lobby/active) with 409, returns 404 for missing room
+- [X] T013 [P] [US3] Write unit tests for `restartRoom()` in `backend/src/services/roomStore.test.ts`: successful restart resets all state (status, scores, guesses), preserves participant list, rejects non-host with 403, rejects wrong-state (lobby/active) with 409, returns 404 for missing room
 
 ### Implementation for User Story 3
 
-- [ ] T014 [US3] Add `restartRoom` Zod schema in `backend/src/api/schemas.ts`
-- [ ] T015 [P] [US3] Implement `restartRoom()` service method in `backend/src/services/roomStore.ts` with host validation, state validation, score/guess reset, and player preservation
-- [ ] T016 [US3] Add `POST /rooms/:code/restart` route handler in `backend/src/api/rooms.ts`
-- [ ] T017 [P] [US3] Add `restartRoom()` API call method in `frontend/src/services/api.ts`
-- [ ] T018 [US3] Add `restartRoom()` action to frontend room store at `frontend/src/state/roomStore.ts`
-- [ ] T019 [US3] Wire restart button on Result Screen — visible only for host, calls `roomStore.restartRoom()` on click
+- [X] T014 [US3] Add `restartRoom` Zod schema in `backend/src/api/schemas.ts`
+- [X] T015 [P] [US3] Implement `restartRoom()` service method in `backend/src/services/roomStore.ts` with host validation, state validation, score/guess reset, and player preservation
+- [X] T016 [US3] Add `POST /rooms/:code/restart` route handler in `backend/src/api/rooms.ts`
+- [X] T017 [P] [US3] Add `restartRoom()` API call method in `frontend/src/services/api.ts`
+- [X] T018 [US3] Add `restartRoom()` action to frontend room store at `frontend/src/state/roomStore.ts`
+- [X] T019 [US3] Wire restart button on Result Screen — visible only for host, calls `roomStore.restartRoom()` on click
 
 **Checkpoint**: Host can restart the game, all backend state resets correctly. Non-host and wrong-state attempts fail.
 
@@ -109,8 +109,8 @@
 
 ### Implementation for User Story 4
 
-- [ ] T020 [US4] Extend `PollingRouter` to auto-navigate to `/lobby` when room status becomes `"lobby"` in `frontend/src/components/PollingRouter.tsx`
-- [ ] T021 [US4] Clear drawing canvas on return to Lobby screen in `frontend/src/pages/LobbyScreen.tsx` (or via the `DrawingCanvas` component clearing itself when status leaves `"active"`)
+- [X] T020 [US4] Extend `PollingRouter` to auto-navigate to `/lobby` when room status becomes `"lobby"` in `frontend/src/components/PollingRouter.tsx`
+- [X] T021 [US4] Clear drawing canvas on return to Lobby screen in `frontend/src/pages/LobbyScreen.tsx` (or via the `DrawingCanvas` component clearing itself when status leaves `"active"`)
 
 **Checkpoint**: After restart, all participants return to Lobby and canvas is clean
 
@@ -120,12 +120,12 @@
 
 **Purpose**: Run the full verification checklist to confirm all scenarios work end-to-end
 
-- [ ] T022 Run backend type check: `cd backend && npx tsc --noEmit`
-- [ ] T023 Run frontend type check: `cd frontend && npx tsc -b`
-- [ ] T024 Run existing backend tests: `cd backend && npm test`
-- [ ] T025 Run existing frontend tests: `cd frontend && npm test`
-- [ ] T026 Verify `GET /health` returns `{ ok: true }`
-- [ ] T027 Execute multi-tab verification flow: start → guess → result → restart → lobby → canvas blank
+- [X] T022 Run backend type check: `cd backend && npx tsc --noEmit`
+- [X] T023 Run frontend type check: `cd frontend && npx tsc -b`
+- [X] T024 Run existing backend tests: `cd backend && npm test`
+- [X] T025 Run existing frontend tests: `cd frontend && npm test`
+- [X] T026 Verify `GET /health` returns `{ ok: true }`
+- [X] T027 Execute multi-tab verification flow: start → guess → result → restart → lobby → canvas blank
 
 **Checkpoint**: All validation checks pass, complete feature verified end-to-end
 

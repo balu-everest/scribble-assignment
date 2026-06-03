@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../components/Card";
 import { DrawingCanvas } from "../components/DrawingCanvas";
@@ -12,33 +12,12 @@ export function GamePage() {
   const navigate = useNavigate();
   const roomStore = useRoomStore();
   const { room, participantId } = useRoomState();
-  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     if (!room) {
       navigate("/", { replace: true });
-      return;
     }
-
-    pollingRef.current = setInterval(async () => {
-      try {
-        const updatedRoom = await roomStore.fetchRoom();
-
-        if (!updatedRoom) {
-          navigate("/", { replace: true });
-        }
-      } catch {
-        // Silently ignore poll errors — preserve last known state
-      }
-    }, 2000);
-
-    return () => {
-      if (pollingRef.current) {
-        clearInterval(pollingRef.current);
-        pollingRef.current = null;
-      }
-    };
-  }, [navigate, room, roomStore]);
+  }, [navigate, room]);
 
   if (!room) {
     return null;

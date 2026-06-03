@@ -18,7 +18,7 @@ export interface Participant {
 
 export interface RoomSnapshot {
   code: string;
-  status: "lobby" | "active";
+  status: "lobby" | "active" | "result";
   participants: Participant[];
   hostId: string;
   drawerId: string | null;
@@ -122,6 +122,12 @@ export const api = {
   leaveRoom(code: string, participantId: string) {
     return request<{ room: RoomSnapshot }>(`/rooms/${encodeURIComponent(code)}/leave`, {
       method: "PATCH",
+      body: JSON.stringify({ participantId })
+    });
+  },
+  restartRoom(code: string, participantId: string) {
+    return request<{ room: RoomSnapshot }>(`/rooms/${encodeURIComponent(code)}/restart`, {
+      method: "POST",
       body: JSON.stringify({ participantId })
     });
   }

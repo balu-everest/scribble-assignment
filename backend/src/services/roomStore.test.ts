@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createRoom, getRoom, joinRoom, leaveRoom, startGame, submitGuess, toRoomSnapshot } from "./roomStore.js";
+import { createRoom, getRoom, joinRoom, leaveRoom, restartRoom, startGame, submitGuess, toRoomSnapshot } from "./roomStore.js";
 
 describe("roomStore", () => {
   it("createRoom returns a room with a 6-character uppercase code", () => {
@@ -287,17 +287,17 @@ describe("roomStore", () => {
       expect(snap.room.guesses[0].isCorrect).toBe(true);
     });
 
-    it("rejects second guess from an already-correct participant", () => {
+    it("rejects second guess after correct guess ends the game", () => {
       const { room, guesserId } = startActiveRoom();
       const correct = submitGuess(room.code, guesserId, room.secretWord);
       expect("error" in correct).toBe(false);
 
       const duplicate = submitGuess(room.code, guesserId, room.secretWord);
       expect("error" in duplicate).toBe(true);
-      expect((duplicate as { error: string }).error).toBe("You have already guessed the correct word");
+      expect((duplicate as { error: string }).error).toBe("Game has ended — no more guesses accepted");
     });
 
-    it("allows two different guessers to both guess correctly", () => {
+    it("first correct guess ends game, rejecting subsequent guesses from other players", () => {
       const { room, participantId } = createRoom("Alice");
       joinRoom(room.code, "Bob");
       joinRoom(room.code, "Charlie");
@@ -308,16 +308,40 @@ describe("roomStore", () => {
 
       const r1 = submitGuess(room.code, bobId, activeRoom.secretWord);
       expect("error" in r1).toBe(false);
+
       const r2 = submitGuess(room.code, charlieId, activeRoom.secretWord);
-      expect("error" in r2).toBe(false);
+      expect("error" in r2).toBe(true);
+      expect((r2 as { error: string }).error).toBe("Game has ended — no more guesses accepted");
 
       const snap1 = r1 as { room: ReturnType<typeof toRoomSnapshot> };
-      const snap2 = r2 as { room: ReturnType<typeof toRoomSnapshot> };
       const g1 = snap1.room.participants.find((p) => p.id === bobId);
-      const g2 = snap2.room.participants.find((p) => p.id === charlieId);
       expect(g1?.score).toBe(100);
-      expect(g2?.score).toBe(100);
     });
+
+    it("correct guess transitions room to result state", () => {
+      const { room, guesserId } = startActiveRoom();
+      const result = submitGuess(room.code, guesserId, room.secretWord);
+      expect("error" in result).toBe(false);
+
+      const updated = getRoom(room.code)!;
+      expect(updated.status).toBe("result");
+    });
+
+    it("rejects guesses after room is in result state", () => {
+      const { room, guesserId, hostId } = startActiveRoom();
+      joinRoom(room.code, "Charlie");
+      const activeRoom = getRoom(room.code)!;
+      const charlieId = activeRoom.participants.find((p) => p.name === "Charlie")!.id;
+
+      const correct = submitGuess(room.code, guesserId, room.secretWord);
+      expect("error" in correct).toBe(false);
+
+      const after = submitGuess(room.code, charlieId, "wrong");
+      expect("error" in after).toBe(true);
+      expect((after as { error: string }).error).toBe("Game has ended — no more guesses accepted");
+    });
+
+
 
     it("appends guesses chronologically and maintains order", () => {
       const { room, guesserId } = startActiveRoom();
@@ -350,6 +374,92 @@ describe("roomStore", () => {
       const guesser = snap.room.participants.find((p) => p.id === guesserId);
       expect(guesser).toHaveProperty("score");
       expect(typeof guesser?.score).toBe("number");
+    });
+  });
+
+  describe("restartRoom", () => {
+    function createResultRoom() {
+      const { room, participantId } = createRoom("Alice");
+      joinRoom(room.code, "Bob");
+      startGame(room.code, participantId);
+      const activeRoom = getRoom(room.code)!;
+      const guesserId = activeRoom.participants.find((p) => p.role === "guesser")!.id;
+      submitGuess(room.code, guesserId, activeRoom.secretWord);
+      return { room: getRoom(room.code)!, hostId: participantId, guesserId };
+    }
+
+    it("successful restart resets status to lobby", () => {
+      const { room, hostId } = createResultRoom();
+      const result = restartRoom(room.code, hostId);
+      expect("error" in result).toBe(false);
+      const snap = result as { room: ReturnType<typeof toRoomSnapshot> };
+      expect(snap.room.status).toBe("lobby");
+    });
+
+    it("successful restart clears guesses and resets scores", () => {
+      const { room, hostId } = createResultRoom();
+      const result = restartRoom(room.code, hostId);
+      expect("error" in result).toBe(false);
+      const snap = result as { room: ReturnType<typeof toRoomSnapshot> };
+      expect(snap.room.guesses).toHaveLength(0);
+      for (const p of snap.room.participants) {
+        expect(p.score).toBe(0);
+      }
+    });
+
+    it("successful restart preserves participant list", () => {
+      const { room, hostId } = createResultRoom();
+      const countBefore = room.participants.length;
+      const result = restartRoom(room.code, hostId);
+      expect("error" in result).toBe(false);
+      const snap = result as { room: ReturnType<typeof toRoomSnapshot> };
+      expect(snap.room.participants).toHaveLength(countBefore);
+    });
+
+    it("successful restart resets roles to null", () => {
+      const { room, hostId } = createResultRoom();
+      const result = restartRoom(room.code, hostId);
+      expect("error" in result).toBe(false);
+      const snap = result as { room: ReturnType<typeof toRoomSnapshot> };
+      for (const p of snap.room.participants) {
+        expect(p.role).toBeNull();
+      }
+    });
+
+    it("rejects non-host participant (403)", () => {
+      const { room, guesserId } = createResultRoom();
+      const result = restartRoom(room.code, guesserId);
+      expect("error" in result).toBe(true);
+      expect((result as { error: string }).error).toBe("Only the host can restart the game");
+    });
+
+    it("rejects restart on lobby room (409)", () => {
+      const { room, participantId } = createRoom("Alice");
+      const result = restartRoom(room.code, participantId);
+      expect("error" in result).toBe(true);
+      expect((result as { error: string }).error).toBe("Game can only be restarted from the result screen");
+    });
+
+    it("rejects restart on active room (409)", () => {
+      const { room, participantId } = createRoom("Alice");
+      joinRoom(room.code, "Bob");
+      startGame(room.code, participantId);
+      const result = restartRoom(room.code, participantId);
+      expect("error" in result).toBe(true);
+      expect((result as { error: string }).error).toBe("Game can only be restarted from the result screen");
+    });
+
+    it("rejects restart on non-existent room (404)", () => {
+      const result = restartRoom("ZZZZZZ", "some-id");
+      expect("error" in result).toBe(true);
+      expect((result as { error: string }).error).toBe("Room not found");
+    });
+
+    it("rejects restart with unknown participantId (400)", () => {
+      const { room, hostId } = createResultRoom();
+      const result = restartRoom(room.code, "unknown-uuid");
+      expect("error" in result).toBe(true);
+      expect((result as { error: string }).error).toBe("Participant not found in room");
     });
   });
 });

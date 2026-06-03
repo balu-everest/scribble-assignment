@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef } from "react";
+import { useRoomState } from "../state/roomStore";
 
 export function DrawingCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawingRef = useRef(false);
   const lastPosRef = useRef<{ x: number; y: number } | null>(null);
+  const { room } = useRoomState();
 
   function getCanvasPos(event: React.MouseEvent<HTMLCanvasElement>) {
     const canvas = canvasRef.current;
@@ -65,6 +67,12 @@ export function DrawingCanvas() {
       canvas.height = Math.max(500, parent.clientHeight);
     }
   }, []);
+
+  useEffect(() => {
+    if (!room || room.status !== "active") {
+      clearCanvas();
+    }
+  }, [room?.status]);
 
   return (
     <div className="drawing-canvas-wrapper">

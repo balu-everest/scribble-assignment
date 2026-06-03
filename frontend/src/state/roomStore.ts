@@ -109,6 +109,16 @@ class RoomStore {
     return response.room;
   }
 
+  async restartRoom() {
+    if (!this.state.room || !this.state.participantId) {
+      throw new Error("Not in a room");
+    }
+
+    const response = await this.withLoading(() => api.restartRoom(this.state.room!.code, this.state.participantId!));
+    this.setRoomSnapshot(response.room);
+    return response.room;
+  }
+
   async fetchRoom() {
     if (!this.state.room) {
       return null;

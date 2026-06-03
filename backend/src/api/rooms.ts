@@ -4,13 +4,14 @@ import {
   HttpError,
   joinRoomSchema,
   leaveRoomSchema,
+  restartRoomSchema,
   roomCodeParamsSchema,
   roomViewerQuerySchema,
   startGameSchema,
   submitGuessSchema
 } from "./schemas.js";
 import type { RoomSnapshot } from "../models/game.js";
-import { createRoom, getRoom, joinRoom, leaveRoom, startGame, submitGuess, toRoomSnapshot } from "../services/roomStore.js";
+import { createRoom, getRoom, joinRoom, leaveRoom, restartRoom, startGame, submitGuess, toRoomSnapshot } from "../services/roomStore.js";
 
 export function createRoomsRouter() {
   const router = Router();
@@ -93,6 +94,32 @@ export function createRoomsRouter() {
           "You have already guessed the correct word": 400,
           "Game is not in progress": 409,
           "Guess cannot be empty": 400
+        };
+        const status = statusMap[err.error] ?? 500;
+        throw new HttpError(status, err.error);
+      }
+
+      const success = result as { room: RoomSnapshot };
+
+      response.json(success);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post("/:code/restart", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const { participantId } = restartRoomSchema.parse(request.body);
+      const result = restartRoom(code.toUpperCase(), participantId);
+
+      if ("error" in result) {
+        const err = result as { error: string };
+        const statusMap: Record<string, number> = {
+          "Room not found": 404,
+          "Participant not found in room": 400,
+          "Only the host can restart the game": 403,
+          "Game can only be restarted from the result screen": 409
         };
         const status = statusMap[err.error] ?? 500;
         throw new HttpError(status, err.error);

@@ -439,6 +439,26 @@ input {
   font-size: 1.125rem;
 }
 
+.winner-row {
+  background-color: #fef9c3;
+  border-radius: 8px;
+  margin: 4px 0;
+  padding: 12px 8px !important;
+}
+
+.winner-badge {
+  display: inline-block;
+  background-color: #f59e0b;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 .canvas-placeholder {
   min-height: 500px; /* significantly taller canvas */
   border: 1px solid var(--line);
@@ -541,6 +561,45 @@ input {
   color: var(--ink);
   font-size: 1.125rem;
   font-weight: 500;
+}
+
+/* --- RESULT PAGE --- */
+.result-page {
+  display: grid;
+  gap: 24px;
+  padding: 32px;
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
+}
+
+.result-page__header {
+  text-align: center;
+}
+
+.result-page__title {
+  margin: 4px 0 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.result-page__actions {
+  display: flex;
+  justify-content: center;
+  padding-top: 8px;
+}
+
+.result-page__message {
+  color: var(--ink-soft);
+  text-align: center;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.result-page__error {
+  color: #dc2626;
+  text-align: center;
+  font-size: 0.875rem;
+  margin: 0;
 }
 
 @media (max-width: 720px) {

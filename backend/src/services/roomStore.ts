@@ -191,6 +191,10 @@ export function submitGuess(code: string, participantId: string, text: string) {
     return { error: "Room not found" as const };
   }
 
+  if (room.status === "result") {
+    return { error: "Game has ended — no more guesses accepted" as const };
+  }
+
   if (room.status !== "active") {
     return { error: "Game is not in progress" as const };
   }
@@ -231,9 +235,48 @@ export function submitGuess(code: string, participantId: string, text: string) {
 
   if (isCorrect) {
     participant.score += 100;
+    room.status = "result";
   }
 
   room.guesses.push(guess);
+  room.updatedAt = now();
+  rooms.set(room.code, room);
+
+  return {
+    room: toRoomSnapshot(room, participantId)
+  };
+}
+
+export function restartRoom(code: string, participantId: string) {
+  const room = rooms.get(code);
+
+  if (!room) {
+    return { error: "Room not found" as const };
+  }
+
+  const participant = room.participants.find((p) => p.id === participantId);
+
+  if (!participant) {
+    return { error: "Participant not found in room" as const };
+  }
+
+  if (participantId !== room.hostId) {
+    return { error: "Only the host can restart the game" as const };
+  }
+
+  if (room.status !== "result") {
+    return { error: "Game can only be restarted from the result screen" as const };
+  }
+
+  room.status = "lobby";
+  room.guesses = [];
+  room.secretWord = "";
+
+  for (const participant of room.participants) {
+    participant.score = 0;
+    participant.role = null;
+  }
+
   room.updatedAt = now();
   rooms.set(room.code, room);
 

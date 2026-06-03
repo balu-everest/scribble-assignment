@@ -13,4 +13,5 @@ precheck-results/
 .env.production.local
 
 .vscode/
+.idea/
 .vite/
