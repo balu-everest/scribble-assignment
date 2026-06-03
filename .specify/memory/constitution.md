@@ -1,50 +1,26 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# Spec Kit Constitution — Project Scribble
 
-## Core Principles
+## 1. Core Engineering Principles
+- **In-Memory State Only:** Do not install or configure databases, persistent storage, or external state containers beyond what the starter kit provides. State must live strictly in the backend node memory.
+- **Polling Synchronization:** All state synchronization between frontend and backend must be handled via HTTP short-polling (~2 seconds). WebSockets or real-time streaming tools are strictly unauthorized.
+- **Fail-Fast Validation:** All user inputs (player names, room codes, guess submissions) must be trimmed and validated immediately on arrival. Empty or whitespace-only inputs must be strictly rejected with clean, explicit UI or API error feedback.
+- **Viewer-Specific Security:** The backend must filter the room state snapshot based on the requesting player's role. Secret data (e.g., the secret word) must never bleed into the payload or network response of a guesser.
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+## 2. Testing Disciplines & Quality Gates
+- **Deterministic State Isolation:** Because the backend relies on in-memory storage, every feature implementation must include a predictable mechanism (such as explicit test endpoints or isolated mock states) to verify round boundaries without state bleeding across rooms.
+- **Client-State Simulation Verification:** Features must be validated by running multiple concurrent sessions (e.g., Tab 1 as Host/Drawer and Tab 2 as Guesser) to confirm that polling payloads dynamically trigger the correct UI transformations across different user roles.
+- **Deterministic Game Logic Testing:** Core algorithmic flows—specifically the case-insensitive comparison of guesses, point calculations (+100 for correct, +0 for incorrect), and the deterministic selection of secret words from the starter array—must be strictly validated with predictable, hardcoded input values before being integrated into UI components.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+## 3. Code Reuse & Anti-Duplication Policy
+- **Read-Before-Write Rule:** The agent must search the existing backend store (`/backend`) and frontend components (`/frontend`) before generating new files. 
+- **Extend, Don't Replace:** Do not rewrite or replace functioning parts of the starter kit. Build clean extensions, middleware, or utility functions instead. Code duplication is completely prohibited.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+## 4. AI Collaboration & Tool Workflow
+- **Spec-First Alignment:** No code or tasks may be generated for a scenario until the specific user stories and acceptance criteria are committed inside `/speckit.specify`.
+- **Zero Specification Drift:** If technical realities during coding require changing a requirement, the specs and technical plans must be updated *before* code modifications are executed.
+- **Sequential Task Execution:** Code changes must be handled atomically, executing exactly one task at a time following the explicit sequence outlined in `/speckit.tasks`.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
-
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
-
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
-
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
-
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
-
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
-
-## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
-
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
-
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+## 5. Review & Commit Discipline
+- **Atomic Commits:** Every scenario or critical fix must be tested and confirmed working (on multiple browser tabs where applicable) before committing via OpenCode.
+- **Zero-Regression Rule:** Implementing new code or workflows must never compromise or break previously validated features (e.g., adding drawing state must not break the initial room setup or lobby polling infrastructure).
+- **Verification Gate:** A task is not considered complete unless `GET /health` passes and typescript compiling checks throw 0 errors.
