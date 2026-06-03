@@ -38,14 +38,14 @@ No setup tasks required — the project is fully scaffolded (Express + React + V
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T001 Add `hostId` field to `Room` and `RoomSnapshot` interfaces in `backend/src/models/game.ts`
-- [ ] T002 [P] Add `hostId` field to frontend `RoomSnapshot` type in `frontend/src/services/api.ts`
-- [ ] T003 [P] Change room code generation from 4 to 6 characters in `backend/src/services/roomStore.ts`
-- [ ] T004 Add Zod validation (`.trim().min(1).max(20)`) for `playerName` in `backend/src/api/schemas.ts`
-- [ ] T005 [P] Add room code validation (`.trim().min(1)`) to `roomCodeParamsSchema` in `backend/src/api/schemas.ts`
-- [ ] T006 Add case-insensitive duplicate name check to `joinRoom` in `backend/src/services/roomStore.ts`
-- [ ] T007 [P] Extend unit tests for schemas (empty name, whitespace name, name >20 chars, empty room code) in `backend/src/api/schemas.test.ts`
-- [ ] T008 [P] Extend unit tests for roomStore (6-character code format, hostId field presence in snapshot) in `backend/src/services/roomStore.test.ts`
+- [X] T001 Add `hostId` field to `Room` and `RoomSnapshot` interfaces in `backend/src/models/game.ts`
+- [X] T002 [P] Add `hostId` field to frontend `RoomSnapshot` type in `frontend/src/services/api.ts`
+- [X] T003 [P] Change room code generation from 4 to 6 characters in `backend/src/services/roomStore.ts`
+- [X] T004 Add Zod validation (`.trim().min(1).max(20)`) for `playerName` in `backend/src/api/schemas.ts`
+- [X] T005 [P] Add room code validation (`.trim().min(1)`) to `roomCodeParamsSchema` in `backend/src/api/schemas.ts`
+- [X] T006 Add case-insensitive duplicate name check to `joinRoom` in `backend/src/services/roomStore.ts`
+- [X] T007 [P] Extend unit tests for schemas (empty name, whitespace name, name >20 chars, empty room code) in `backend/src/api/schemas.test.ts`
+- [X] T008 [P] Extend unit tests for roomStore (6-character code format, hostId field presence in snapshot) in `backend/src/services/roomStore.test.ts`
 
 **Checkpoint**: Foundation ready — all models, validation, and base tests in place
 
@@ -59,13 +59,13 @@ No setup tasks required — the project is fully scaffolded (Express + React + V
 
 ### Tests for User Story 1
 
-- [ ] T009 [US1] Extend roomStore tests for host assignment on room creation in `backend/src/services/roomStore.test.ts`
+- [X] T009 [US1] Extend roomStore tests for host assignment on room creation in `backend/src/services/roomStore.test.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T010 [US1] Set `hostId` on room creation and include `hostId` in snapshot in `backend/src/services/roomStore.ts`
-- [ ] T011 [P] [US1] Return updated error messages for invalid names (empty, whitespace, too long) from `POST /rooms` in `backend/src/api/rooms.ts`
-- [ ] T012 [P] [US1] Add "Host" indicator/badge next to host participant's name in lobby participant list at `frontend/src/pages/LobbyPage.tsx`
+- [X] T010 [US1] Set `hostId` on room creation and include `hostId` in snapshot in `backend/src/services/roomStore.ts`
+- [X] T011 [P] [US1] Return updated error messages for invalid names (empty, whitespace, too long) from `POST /rooms` in `backend/src/api/rooms.ts`
+- [X] T012 [P] [US1] Add "Host" indicator/badge next to host participant's name in lobby participant list at `frontend/src/pages/LobbyPage.tsx`
 
 **Checkpoint**: US1 complete — creating a room works end-to-end with host tracking
 
@@ -79,13 +79,13 @@ No setup tasks required — the project is fully scaffolded (Express + React + V
 
 ### Tests for User Story 2
 
-- [ ] T013 [US2] Extend roomStore tests for duplicate name rejection (case-insensitive) in `backend/src/services/roomStore.test.ts`
+- [X] T013 [US2] Extend roomStore tests for duplicate name rejection (case-insensitive) in `backend/src/services/roomStore.test.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T014 [US2] Validate input and return descriptive errors (empty name, whitespace, too long, duplicate name, room not found) from `POST /rooms/:code/join` in `backend/src/api/rooms.ts`
-- [ ] T015 [P] [US2] Show server validation error messages in JoinRoomPage form at `frontend/src/pages/JoinRoomPage.tsx`
-- [ ] T016 [US2] Update participant list with host badge after successful join in lobby at `frontend/src/pages/LobbyPage.tsx`
+- [X] T014 [US2] Validate input and return descriptive errors (empty name, whitespace, too long, duplicate name, room not found) from `POST /rooms/:code/join` in `backend/src/api/rooms.ts`
+- [X] T015 [P] [US2] Show server validation error messages in JoinRoomPage form at `frontend/src/pages/JoinRoomPage.tsx`
+- [X] T016 [US2] Update participant list with host badge after successful join in lobby at `frontend/src/pages/LobbyPage.tsx`
 
 **Checkpoint**: US2 complete — joining rooms works with full validation and lobby visibility
 
@@ -99,18 +99,18 @@ No setup tasks required — the project is fully scaffolded (Express + React + V
 
 ### Tests for User Story 3
 
-- [ ] T017 [US3] Extend roomStore tests for leave endpoint and host promotion in `backend/src/services/roomStore.test.ts`
-- [ ] T018 [P] [US3] Extend API client tests for leaveRoom method in `frontend/src/services/api.test.ts`
+- [X] T017 [US3] Extend roomStore tests for leave endpoint and host promotion in `backend/src/services/roomStore.test.ts`
+- [X] T018 [P] [US3] Extend API client tests for leaveRoom method in `frontend/src/services/api.test.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T019 [US3] Implement `PATCH /rooms/:code/leave` endpoint with host transfer logic in `backend/src/services/roomStore.ts`
-- [ ] T020 [US3] Register leave route handler in `backend/src/api/rooms.ts`
-- [ ] T021 [P] [US3] Add `leaveRoom` API client method (`PATCH /rooms/:code/leave`) in `frontend/src/services/api.ts`
-- [ ] T022 [US3] Add `leaveRoom` method to RoomStore (clear state, navigate to `/`) in `frontend/src/state/roomStore.ts`
-- [ ] T023 [US3] Add auto-polling with `setInterval` (2000ms) calling `roomStore.fetchRoom()` in LobbyPage at `frontend/src/pages/LobbyPage.tsx`
-- [ ] T024 [US3] Handle poll network errors silently (preserve last known state, no error toast) in `frontend/src/pages/LobbyPage.tsx`
-- [ ] T025 [P] [US3] Add "Leave Room" button to LobbyPage at `frontend/src/pages/LobbyPage.tsx` (visible to all players)
+- [X] T019 [US3] Implement `PATCH /rooms/:code/leave` endpoint with host transfer logic in `backend/src/services/roomStore.ts`
+- [X] T020 [US3] Register leave route handler in `backend/src/api/rooms.ts`
+- [X] T021 [P] [US3] Add `leaveRoom` API client method (`PATCH /rooms/:code/leave`) in `frontend/src/services/api.ts`
+- [X] T022 [US3] Add `leaveRoom` method to RoomStore (clear state, navigate to `/`) in `frontend/src/state/roomStore.ts`
+- [X] T023 [US3] Add auto-polling with `setInterval` (2000ms) calling `roomStore.fetchRoom()` in LobbyPage at `frontend/src/pages/LobbyPage.tsx`
+- [X] T024 [US3] Handle poll network errors silently (preserve last known state, no error toast) in `frontend/src/pages/LobbyPage.tsx`
+- [X] T025 [P] [US3] Add "Leave Room" button to LobbyPage at `frontend/src/pages/LobbyPage.tsx` (visible to all players)
 
 **Checkpoint**: US3 complete — real-time sync and leave/host-transfer work end-to-end
 
@@ -124,8 +124,8 @@ No setup tasks required — the project is fully scaffolded (Express + React + V
 
 ### Implementation for User Story 4
 
-- [ ] T026 [US4] Add host-gated "Start Game" button (visible and enabled only when `participantId === room.hostId && room.participants.length >= 2`) in `frontend/src/pages/LobbyPage.tsx`
-- [ ] T027 [US4] Disable "Start Game" button when `room.participants.length < 2` in `frontend/src/pages/LobbyPage.tsx`
+- [X] T026 [US4] Add host-gated "Start Game" button (visible and enabled only when `participantId === room.hostId && room.participants.length >= 2`) in `frontend/src/pages/LobbyPage.tsx`
+- [X] T027 [US4] Disable "Start Game" button when `room.participants.length < 2` in `frontend/src/pages/LobbyPage.tsx`
 
 **Checkpoint**: US4 complete — host gating and minimum-player enforcement work
 
@@ -135,10 +135,10 @@ No setup tasks required — the project is fully scaffolded (Express + React + V
 
 **Purpose**: Verification, cleanup, and edge-case hardening
 
-- [ ] T028 Run `cd backend && npm test` and fix any failures
-- [ ] T029 Run `cd frontend && npm test` and fix any failures
-- [ ] T030 Run `cd backend && npx tsc --noEmit` and fix type errors
-- [ ] T031 Run `cd frontend && npx tsc -b` and fix type errors
+- [X] T028 Run `cd backend && npm test` and fix any failures
+- [X] T029 Run `cd frontend && npm test` and fix any failures
+- [X] T030 Run `cd backend && npx tsc --noEmit` and fix type errors
+- [X] T031 Run `cd frontend && npx tsc -b` and fix type errors
 - [ ] T032 Manual multi-tab verification per spec's Independent Test criteria
 
 ---

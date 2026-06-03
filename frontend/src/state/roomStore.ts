@@ -98,6 +98,23 @@ class RoomStore {
     this.setRoomSnapshot(response.room);
     return response.room;
   }
+
+  clearRoom() {
+    this.setState({
+      room: null,
+      participantId: null,
+      error: null
+    });
+  }
+
+  async leaveRoom() {
+    if (!this.state.room || !this.state.participantId) {
+      return;
+    }
+
+    await api.leaveRoom(this.state.room.code, this.state.participantId);
+    this.clearRoom();
+  }
 }
 
 const RoomStoreContext = createContext<RoomStore | null>(null);

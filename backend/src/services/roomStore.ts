@@ -12,7 +12,7 @@ function generateCode() {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let code = "";
 
-  for (let index = 0; index < 4; index += 1) {
+  for (let index = 0; index < 6; index += 1) {
     code += alphabet[Math.floor(Math.random() * alphabet.length)];
   }
 
@@ -54,6 +54,7 @@ export function createRoom(playerName?: string) {
   const room: Room = {
     code: generateUniqueCode(),
     status: "lobby",
+    hostId: participant.id,
     participants: [participant],
     createdAt: now(),
     updatedAt: now()
@@ -71,7 +72,16 @@ export function joinRoom(code: string, playerName?: string) {
   const room = rooms.get(code);
 
   if (!room) {
-    return null;
+    return { error: "Room not found" as const };
+  }
+
+  const display = displayName(playerName);
+  const duplicate = room.participants.some(
+    (p) => p.name.toLowerCase() === display.toLowerCase()
+  );
+
+  if (duplicate) {
+    return { error: "That name is already taken" as const };
   }
 
   const participant = createParticipant(playerName);
@@ -82,6 +92,40 @@ export function joinRoom(code: string, playerName?: string) {
   return {
     room: cloneRoom(room),
     participantId: participant.id
+  };
+}
+
+export function leaveRoom(code: string, participantId: string) {
+  const room = rooms.get(code);
+
+  if (!room) {
+    return { error: "Room not found" as const };
+  }
+
+  const index = room.participants.findIndex((p) => p.id === participantId);
+
+  if (index === -1) {
+    return { error: "Participant not found" as const };
+  }
+
+  const wasHost = room.hostId === participantId;
+  room.participants.splice(index, 1);
+
+  if (room.participants.length === 0) {
+    room.hostId = null as unknown as string;
+  } else if (wasHost) {
+    const sorted = [...room.participants].sort(
+      (a, b) => new Date(a.joinedAt).getTime() - new Date(b.joinedAt).getTime()
+    );
+
+    room.hostId = sorted[0].id;
+  }
+
+  room.updatedAt = now();
+  rooms.set(room.code, room);
+
+  return {
+    room: cloneRoom(room)
   };
 }
 
@@ -103,6 +147,7 @@ export function toRoomSnapshot(room: Room, viewerParticipantId?: string): RoomSn
     code: room.code,
     status: room.status,
     participants: room.participants.map((participant) => ({ ...participant })),
+    hostId: room.hostId,
     availableWords: listWords(),
     roles: [...STARTER_ROLES]
   };

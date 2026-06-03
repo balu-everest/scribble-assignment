@@ -3,10 +3,11 @@ import {
   createRoomSchema,
   HttpError,
   joinRoomSchema,
+  leaveRoomSchema,
   roomCodeParamsSchema,
   roomViewerQuerySchema
 } from "./schemas.js";
-import { createRoom, getRoom, joinRoom, toRoomSnapshot } from "../services/roomStore.js";
+import { createRoom, getRoom, joinRoom, leaveRoom, toRoomSnapshot } from "../services/roomStore.js";
 
 export function createRoomsRouter() {
   const router = Router();
@@ -31,13 +32,39 @@ export function createRoomsRouter() {
       const { playerName } = joinRoomSchema.parse(request.body);
       const result = joinRoom(code.toUpperCase(), playerName);
 
-      if (!result) {
-        throw new HttpError(404, "Unable to join room");
+      if ("error" in result) {
+        const err = (result as { error: string }).error;
+        const status = err === "Room not found" ? 404 : 400;
+        throw new HttpError(status, err);
       }
 
+      const success = result as { room: Parameters<typeof toRoomSnapshot>[0]; participantId: string };
+
       response.json({
-        participantId: result.participantId,
-        room: toRoomSnapshot(result.room, result.participantId)
+        participantId: success.participantId,
+        room: toRoomSnapshot(success.room, success.participantId)
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.patch("/:code/leave", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const { participantId } = leaveRoomSchema.parse(request.body);
+      const result = leaveRoom(code.toUpperCase(), participantId);
+
+      if ("error" in result) {
+        const err = result as { error: string };
+        const status = err.error === "Room not found" ? 404 : 400;
+        throw new HttpError(status, err.error);
+      }
+
+      const success = result as { room: Parameters<typeof toRoomSnapshot>[0] };
+
+      response.json({
+        room: toRoomSnapshot(success.room)
       });
     } catch (error) {
       next(error);
