@@ -14,6 +14,10 @@
 
 - Q: Should the room snapshot reveal all players' roles to everyone, or only each player's own role? → A: All players see every participant's role (drawer is publicly known).
 
+### Session 2026-06-03 (After Implementation)
+
+- Q: The "Exit Game" button on the game screen only navigates to `/lobby` without calling the leave API, leaving the participant stuck in the backend room. Should this be fixed? → A: Yes. Clicking "Exit Game" must actually remove the participant from the room on the backend and clear local state, then navigate home.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Host Starts the Game (Priority: P1)
@@ -78,12 +82,28 @@ As the system, I want to ensure that all player names stored during active gamep
 2. **Given** a player attempting to join a room, **When** they provide a name with surrounding whitespace, **Then** the system trims the whitespace and accepts the trimmed name.
 3. **Given** a player attempting to join a room, **When** they provide an empty string as a name, **Then** the system rejects the entry.
 
+---
+
+### User Story 5 - Players Can Exit the Game (Priority: P3)
+
+As a player in an active game, I want to exit the game cleanly so that I am removed from the room on the backend and return to the home screen.
+
+**Why this priority**: Clean exit prevents stale participants accumulating in backend room state and ensures accurate participant lists.
+
+**Independent Test**: Join a room as a guesser, start the game, click "Exit Game". Verify the participant is removed from the backend room state and the user is back on the home screen.
+
+**Acceptance Scenarios**:
+
+1. **Given** a player in an active game, **When** they click "Exit Game", **Then** they are removed from the room on the backend via `PATCH /rooms/:code/leave`, local state is cleared, and they are navigated to the home screen.
+2. **Given** a player who exits the game, **When** they return to the home screen, **Then** no stale room data remains in local state.
+
 ### Edge Cases
 
 - What happens if the host disconnects immediately after starting the game? The game remains active with remaining players.
 - What happens if a player joins during the transition from lobby to active? The player receives the active room state with a role assignment (guesser if they are not the host).
 - How does the system handle a room where all guessers leave after game starts? The game continues (edge of scope — only initial state is covered).
 - What happens if the polling detects an error (e.g., room not found)? The user should see a friendly error message rather than crashing.
+- What happens when a player exits the game while others are still playing? The room remains active with remaining participants. If the exiting player was the drawer, host reassignment follows existing leave logic.
 
 ## Requirements *(mandatory)*
 
@@ -101,6 +121,7 @@ As the system, I want to ensure that all player names stored during active gamep
 - **FR-010**: Upon game start, the system MUST deterministically select a secret word from the predefined list: [rocket, pizza, castle, guitar, sunflower].
 - **FR-011**: The secret word MUST only be visible to the drawer. Guessers MUST NOT be able to see the secret word through any means.
 - **FR-012**: The system MUST include each player's assigned role (drawer or guesser) in the room state response. All participants' roles MUST be visible to all players in the room (roles are public).
+- **FR-013**: The "Exit Game" button on the game screen MUST remove the participant from the room via `PATCH /rooms/:code/leave`, clear local room state, and navigate to the home screen.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -118,6 +139,7 @@ As the system, I want to ensure that all player names stored during active gamep
 - **SC-004**: The secret word is successfully hidden from all guessers at all times — verifiable by checking that guessers cannot see the word through any accessible means.
 - **SC-005**: Player names with whitespace-only or empty values are rejected 100% of the time, with no false rejections of valid names.
 - **SC-006**: Non-host attempts to start the game are rejected 100% of the time.
+- **SC-007**: Clicking "Exit Game" removes the participant from the backend room and returns them to the home screen.
 
 ## Assumptions
 

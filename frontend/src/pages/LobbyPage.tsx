@@ -33,6 +33,20 @@ export function LobbyPage() {
     };
   }, [navigate, room, roomStore]);
 
+  useEffect(() => {
+    if (room?.status === "active") {
+      navigate("/game");
+    }
+  }, [navigate, room?.status]);
+
+  async function handleStart() {
+    try {
+      await roomStore.startGame();
+    } catch {
+      // Error already set in store state
+    }
+  }
+
   async function handleLeave() {
     try {
       await roomStore.leaveRoom();
@@ -96,7 +110,7 @@ export function LobbyPage() {
           <button
             className="button button--primary"
             disabled={room.participants.length < 2}
-            onClick={() => navigate("/game")}
+            onClick={handleStart}
           >
             {room.participants.length < 2 ? "Waiting for players..." : "Start Game"}
           </button>

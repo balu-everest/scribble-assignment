@@ -4,13 +4,16 @@ export interface Participant {
   id: string;
   name: string;
   joinedAt: string;
+  role?: ParticipantRole | null;
 }
 
 export interface RoomSnapshot {
   code: string;
-  status: "lobby";
+  status: "lobby" | "active";
   participants: Participant[];
   hostId: string;
+  drawerId: string | null;
+  secretWord: string | null;
   availableWords: string[];
   roles: ParticipantRole[];
 }
@@ -58,6 +61,12 @@ export const api = {
   fetchRoom(code: string, participantId?: string) {
     const query = participantId ? `?participantId=${encodeURIComponent(participantId)}` : "";
     return request<{ room: RoomSnapshot }>(`/rooms/${encodeURIComponent(code)}${query}`);
+  },
+  startGame(code: string, participantId: string) {
+    return request<{ room: RoomSnapshot }>(`/rooms/${encodeURIComponent(code)}/start`, {
+      method: "POST",
+      body: JSON.stringify({ participantId })
+    });
   },
   leaveRoom(code: string, participantId: string) {
     return request<{ room: RoomSnapshot }>(`/rooms/${encodeURIComponent(code)}/leave`, {

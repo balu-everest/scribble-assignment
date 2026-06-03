@@ -89,6 +89,16 @@ class RoomStore {
     return response;
   }
 
+  async startGame() {
+    if (!this.state.room || !this.state.participantId) {
+      return;
+    }
+
+    const response = await this.withLoading(() => api.startGame(this.state.room!.code, this.state.participantId!));
+    this.setRoomSnapshot(response.room);
+    return response.room;
+  }
+
   async fetchRoom() {
     if (!this.state.room) {
       return null;

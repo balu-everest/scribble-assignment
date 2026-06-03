@@ -37,7 +37,8 @@ function createParticipant(name?: string): Participant {
   return {
     id: randomUUID(),
     name: displayName(name),
-    joinedAt: now()
+    joinedAt: now(),
+    role: null
   };
 }
 
@@ -56,6 +57,7 @@ export function createRoom(playerName?: string) {
     status: "lobby",
     hostId: participant.id,
     participants: [participant],
+    secretWord: "",
     createdAt: now(),
     updatedAt: now()
   };
@@ -140,14 +142,60 @@ export function saveRoom(room: Room) {
   return getRoom(room.code);
 }
 
+function charCodeSum(code: string): number {
+  return code.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
+}
+
+export function startGame(code: string, participantId: string) {
+  const room = rooms.get(code);
+
+  if (!room) {
+    return { error: "Room not found" as const };
+  }
+
+  const participant = room.participants.find((p) => p.id === participantId);
+
+  if (!participant) {
+    return { error: "Participant not found in room" as const };
+  }
+
+  if (participantId !== room.hostId) {
+    return { error: "Only the host can start the game" as const };
+  }
+
+  if (room.status !== "lobby") {
+    return { error: "Game has already started" as const };
+  }
+
+  for (const p of room.participants) {
+    p.role = p.id === room.hostId ? "drawer" : "guesser";
+  }
+
+  const wordIndex = charCodeSum(room.code) % STARTER_WORDS.length;
+  room.secretWord = STARTER_WORDS[wordIndex];
+  room.status = "active";
+  room.updatedAt = now();
+  rooms.set(room.code, room);
+
+  return {
+    room: toRoomSnapshot(room, participantId)
+  };
+}
+
 export function toRoomSnapshot(room: Room, viewerParticipantId?: string): RoomSnapshot {
-  void viewerParticipantId;
+  const drawer = room.participants.find((p) => p.role === "drawer");
+  const viewer = viewerParticipantId
+    ? room.participants.find((p) => p.id === viewerParticipantId)
+    : null;
+  const isViewerDrawer = viewer?.role === "drawer";
 
   return {
     code: room.code,
     status: room.status,
     participants: room.participants.map((participant) => ({ ...participant })),
     hostId: room.hostId,
+    drawerId: drawer?.id ?? null,
+    secretWord: isViewerDrawer ? room.secretWord : null,
     availableWords: listWords(),
     roles: [...STARTER_ROLES]
   };

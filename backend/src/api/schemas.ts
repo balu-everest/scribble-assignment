@@ -18,6 +18,10 @@ export const leaveRoomSchema = z.object({
   participantId: z.string().min(1, "Participant ID is required")
 });
 
+export const startGameSchema = z.object({
+  participantId: z.string().uuid()
+});
+
 export const roomViewerQuerySchema = z.object({
   participantId: z.string().optional()
 });

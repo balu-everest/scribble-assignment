@@ -39,8 +39,8 @@ No tasks in this phase.
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T001 Add `"active"` to `RoomStatus`, `role: ParticipantRole | null` to `Participant`, `secretWord: string` to `Room`, and `drawerId: string | null` + viewer-scoped `secretWord: string | null` to `RoomSnapshot` in `backend/src/models/game.ts`
-- [ ] T002 Add optional `viewerParticipantId` parameter to `toRoomSnapshot()` and filter `secretWord` to `null` when viewer is not the drawer in `backend/src/services/roomStore.ts`
+- [X] T001 Add `"active"` to `RoomStatus`, `role: ParticipantRole | null` to `Participant`, `secretWord: string` to `Room`, and `drawerId: string | null` + viewer-scoped `secretWord: string | null` to `RoomSnapshot` in `backend/src/models/game.ts`
+- [X] T002 Add optional `viewerParticipantId` parameter to `toRoomSnapshot()` and filter `secretWord` to `null` when viewer is not the drawer in `backend/src/services/roomStore.ts`
 
 **Checkpoint**: Foundation ready — user story implementation can now begin.
 
@@ -54,17 +54,17 @@ No tasks in this phase.
 
 ### Tests for User Story 1 (OPTIONAL — included per research.md) ⚠️
 
-- [ ] T003 [P] [US1] Write backend tests: startGame transitions room, assigns host as drawer, rejects non-host (403), rejects already-active (409), deterministic word selection, viewer filtering in `backend/src/services/roomStore.test.ts`
-- [ ] T004 [P] [US1] Write frontend test: startGame sends POST with participantId to /rooms/:code/start in `frontend/src/services/api.test.ts`
+- [X] T003 [P] [US1] Write backend tests: startGame transitions room, assigns host as drawer, rejects non-host (403), rejects already-active (409), deterministic word selection, viewer filtering in `backend/src/services/roomStore.test.ts`
+- [X] T004 [P] [US1] Write frontend test: startGame sends POST with participantId to /rooms/:code/start in `frontend/src/services/api.test.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T005 [P] [US1] Add `startGameSchema` Zod schema with `participantId: z.string().uuid()` in `backend/src/api/schemas.ts`
-- [ ] T006 [US1] Implement `startGame(code, participantId)` in `roomStore`: look up room (404), verify hostId matches (403), verify status is "lobby" (409), assign roles (host=drawer, others=guesser), select word deterministically via charCodeSum(code) % words.length, set status="active", return snapshot in `backend/src/services/roomStore.ts`
-- [ ] T007 [US1] Add `POST /:code/start` route handler with Zod validation, error handling (404/403/409/400), and call to `roomStore.startGame()` in `backend/src/api/rooms.ts`
-- [ ] T008 [P] [US1] Add `startGame(code: string, participantId: string)` method calling `POST /rooms/:code/start` in `frontend/src/services/api.ts`
-- [ ] T009 [P] [US1] Update frontend `RoomSnapshot` with `drawerId` and `secretWord`, update `Participant` with optional `role` field in `frontend/src/services/api.ts`
-- [ ] T010 [US1] Add `async startGame()` action calling `api.startGame()` and updating room state with response snapshot in `frontend/src/state/roomStore.ts`
+- [X] T005 [P] [US1] Add `startGameSchema` Zod schema with `participantId: z.string().uuid()` in `backend/src/api/schemas.ts`
+- [X] T006 [US1] Implement `startGame(code, participantId)` in `roomStore`: look up room (404), verify hostId matches (403), verify status is "lobby" (409), assign roles (host=drawer, others=guesser), select word deterministically via charCodeSum(code) % words.length, set status="active", return snapshot in `backend/src/services/roomStore.ts`
+- [X] T007 [US1] Add `POST /:code/start` route handler with Zod validation, error handling (404/403/409/400), and call to `roomStore.startGame()` in `backend/src/api/rooms.ts`
+- [X] T008 [P] [US1] Add `startGame(code: string, participantId: string)` method calling `POST /rooms/:code/start` in `frontend/src/services/api.ts`
+- [X] T009 [P] [US1] Update frontend `RoomSnapshot` with `drawerId` and `secretWord`, update `Participant` with optional `role` field in `frontend/src/services/api.ts`
+- [X] T010 [US1] Add `async startGame()` action calling `api.startGame()` and updating room state with response snapshot in `frontend/src/state/roomStore.ts`
 
 **Checkpoint**: Backend game start works; frontend can trigger it. MVP deliverable.
 
@@ -78,8 +78,8 @@ No tasks in this phase.
 
 ### Implementation for User Story 2
 
-- [ ] T011 [P] [US2] Add `useEffect` watching `room.status` — when `"active"`, call `navigate("/game")` in `frontend/src/pages/LobbyPage.tsx`
-- [ ] T012 [US2] Wire the "Start Game" button to `roomStore.startGame()` instead of direct `navigate("/game")` in `frontend/src/pages/LobbyPage.tsx`
+- [X] T011 [P] [US2] Add `useEffect` watching `room.status` — when `"active"`, call `navigate("/game")` in `frontend/src/pages/LobbyPage.tsx`
+- [X] T012 [US2] Wire the "Start Game" button to `roomStore.startGame()` instead of direct `navigate("/game")` in `frontend/src/pages/LobbyPage.tsx`
 
 **Checkpoint**: All players auto-route to game screen on game start.
 
@@ -93,8 +93,8 @@ No tasks in this phase.
 
 ### Implementation for User Story 3
 
-- [ ] T013 [P] [US3] Add 2-second polling `setInterval` calling `roomStore.fetchRoom()` on GamePage mount, clear interval on unmount. On network error: silently preserve last known state. On 404: navigate back to home in `frontend/src/pages/GamePage.tsx`
-- [ ] T014 [US3] Display: viewer's role ("drawer" / "guesser"), secretWord (only if drawer), drawer's name prominently; show "Waiting for the drawer to draw..." for guessers in `frontend/src/pages/GamePage.tsx`
+- [X] T013 [P] [US3] Add 2-second polling `setInterval` calling `roomStore.fetchRoom()` on GamePage mount, clear interval on unmount. On network error: silently preserve last known state. On 404: navigate back to home in `frontend/src/pages/GamePage.tsx`
+- [X] T014 [US3] Display: viewer's role ("drawer" / "guesser"), secretWord (only if drawer), drawer's name prominently; show "Waiting for the drawer to draw..." for guessers in `frontend/src/pages/GamePage.tsx`
 
 **Checkpoint**: Game screen shows role-appropriate information with viewer-scoped secret word.
 
@@ -108,23 +108,31 @@ No tasks in this phase.
 
 ### Implementation for User Story 4
 
-- [ ] T015 [US4] Verify existing Zod `joinRoomSchema` enforces `.trim().min(1)` on `playerName` — confirm existing backend tests pass; add test case for whitespace-only rejection if missing in `backend/src/api/schemas.ts` and `backend/src/services/roomStore.test.ts`
+- [X] T015 [US4] Verify existing Zod `joinRoomSchema` enforces `.trim().min(1)` on `playerName` — confirmed existing schemas.test.ts covers whitespace-only rejection
 
 **Checkpoint**: Name validation enforced end-to-end.
 
 ---
 
-## Phase 7: Polish & Cross-Cutting Concerns
+## Phase 7: Exit Game Fix
+
+**Purpose**: Fix the broken Exit Game button on the game screen.
+
+- [X] T023 [US5] Fix "Exit Game" button in `frontend/src/pages/GamePage.tsx` to call `roomStore.leaveRoom()` and navigate to `"/"` instead of `"/lobby"`
+
+---
+
+## Phase 8: Polish & Cross-Cutting Concerns
 
 **Purpose**: Final verification and quality assurance.
 
-- [ ] T016 Run type check: `cd backend && npx tsc --noEmit`
-- [ ] T017 Run type check: `cd frontend && npx tsc -b`
-- [ ] T018 Run backend tests: `cd backend && npm test`
-- [ ] T019 Run frontend tests: `cd frontend && npm test`
-- [ ] T020 Verify `GET /health` returns `{ ok: true }`
+- [X] T016 Run type check: `cd backend && npx tsc --noEmit` ✓
+- [X] T017 Run type check: `cd frontend && npx tsc -b` ✓
+- [X] T018 Run backend tests: `cd backend && npm test` ✓ (35 tests)
+- [X] T019 Run frontend tests: `cd frontend && npm test` ✓ (4 tests)
+- [X] T020 Verify `GET /health` returns `{ ok: true }` ✓
 - [ ] T021 Multi-tab browser test: host starts game, all tabs navigate to `/game`, drawer sees secret word, guesser does not
-- [ ] T022 Run quickstart.md verification checklist
+- [X] T022 Run quickstart.md verification checklist ✓
 
 ---
 
