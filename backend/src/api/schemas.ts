@@ -18,6 +18,11 @@ export const leaveRoomSchema = z.object({
   participantId: z.string().min(1, "Participant ID is required")
 });
 
+export const submitGuessSchema = z.object({
+  participantId: z.string().uuid(),
+  text: z.string().min(1, "Guess cannot be empty")
+});
+
 export const startGameSchema = z.object({
   participantId: z.string().uuid()
 });

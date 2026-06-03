@@ -22,7 +22,7 @@
 
 ## 3. Network Error Auto-Retry (from Clarification)
 
-**Decision**: The frontend `submitGuess()` method in `api.ts` wraps the `POST` request in a retry loop: up to 3 attempts with a ~1-second delay between retries. On the final failure, the `GuessForm` shows an inline error message ("Failed to submit guess. Please try again.") and preserves the typed text in the input field. This matches the clarified behavior (Option C).
+**Decision**: The frontend `submitGuess()` method in `api.ts` wraps the `POST` request in a retry loop: up to 3 attempts with a ~1-second delay between retries. Only network errors (no response) trigger retries — server validation errors (4xx) are treated as final and surfaced immediately. On final network failure, the `GuessForm` shows a generic fallback ("Failed to submit guess. Please try again."). On validation failure, the server's exact error message from the JSON response body is displayed. In both cases the typed text is preserved. This matches the clarified behavior (Option C).
 
 **Rationale**: Transient network errors are common in web apps. Auto-retry maximizes delivery success without blocking the user. Falling back to an inline error with preserved text gives the user control without losing their input.
 

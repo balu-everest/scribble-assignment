@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createRoom, getRoom, joinRoom, leaveRoom, startGame, toRoomSnapshot } from "./roomStore.js";
+import { createRoom, getRoom, joinRoom, leaveRoom, startGame, submitGuess, toRoomSnapshot } from "./roomStore.js";
 
 describe("roomStore", () => {
   it("createRoom returns a room with a 6-character uppercase code", () => {
@@ -195,6 +195,161 @@ describe("roomStore", () => {
       const snap = toRoomSnapshot(room, participantId);
 
       expect(snap.secretWord).toBeNull();
+    });
+  });
+
+  describe("submitGuess", () => {
+    function startActiveRoom() {
+      const { room, participantId } = createRoom("Alice");
+      joinRoom(room.code, "Bob");
+      startGame(room.code, participantId);
+      const activeRoom = getRoom(room.code)!;
+      return { room: activeRoom, hostId: participantId, guesserId: activeRoom.participants.find((p) => p.role === "guesser")!.id };
+    }
+
+    it("rejects empty/whitespace guesses", () => {
+      const { room, guesserId } = startActiveRoom();
+      expect(submitGuess(room.code, guesserId, "")).toEqual({ error: "Guess cannot be empty" });
+      expect(submitGuess(room.code, guesserId, "   ")).toEqual({ error: "Guess cannot be empty" });
+      expect(submitGuess(room.code, guesserId, " \t ")).toEqual({ error: "Guess cannot be empty" });
+    });
+
+    it("rejects non-guesser participant", () => {
+      const { room, hostId } = startActiveRoom();
+      const result = submitGuess(room.code, hostId, "hello");
+      expect("error" in result).toBe(true);
+      expect((result as { error: string }).error).toBe("Only guessers can submit guesses");
+    });
+
+    it("rejects inactive room", () => {
+      const { room } = createRoom("Alice");
+      const join = joinRoom(room.code, "Bob");
+      const bobId = (join as { participantId: string }).participantId;
+      const result = submitGuess(room.code, bobId, "hello");
+      expect("error" in result).toBe(true);
+      expect((result as { error: string }).error).toBe("Game is not in progress");
+    });
+
+    it("rejects unknown room", () => {
+      const result = submitGuess("ZZZZZZ", "some-id", "hello");
+      expect("error" in result).toBe(true);
+      expect((result as { error: string }).error).toBe("Room not found");
+    });
+
+    it("rejects unknown participant", () => {
+      const { room } = startActiveRoom();
+      const result = submitGuess(room.code, "unknown-id", "hello");
+      expect("error" in result).toBe(true);
+      expect((result as { error: string }).error).toBe("Participant not found in room");
+    });
+
+    it("accepts incorrect guess: 0 points, isCorrect false", () => {
+      const { room, guesserId } = startActiveRoom();
+      const result = submitGuess(room.code, guesserId, "wrong");
+      expect("error" in result).toBe(false);
+      const snap = result as { room: ReturnType<typeof toRoomSnapshot> };
+      expect(snap.room.guesses).toHaveLength(1);
+      expect(snap.room.guesses[0].isCorrect).toBe(false);
+      expect(snap.room.guesses[0].text).toBe("wrong");
+      const guesser = snap.room.participants.find((p) => p.id === guesserId);
+      expect(guesser?.score).toBe(0);
+    });
+
+    it("awards +100 points for exact match correct guess", () => {
+      const { room, guesserId } = startActiveRoom();
+      const secretWord = room.secretWord;
+      const result = submitGuess(room.code, guesserId, secretWord);
+      expect("error" in result).toBe(false);
+      const snap = result as { room: ReturnType<typeof toRoomSnapshot> };
+      expect(snap.room.guesses).toHaveLength(1);
+      expect(snap.room.guesses[0].isCorrect).toBe(true);
+      expect(snap.room.guesses[0].text).toBe(secretWord);
+      const guesser = snap.room.participants.find((p) => p.id === guesserId);
+      expect(guesser?.score).toBe(100);
+    });
+
+    it("awards +100 points for case-insensitive match (UPPERCASE)", () => {
+      const { room, guesserId } = startActiveRoom();
+      const result = submitGuess(room.code, guesserId, room.secretWord.toUpperCase());
+      expect("error" in result).toBe(false);
+      const snap = result as { room: ReturnType<typeof toRoomSnapshot> };
+      const guess = snap.room.guesses[0];
+      expect(guess.isCorrect).toBe(true);
+      expect(guess.text).toBe(room.secretWord.toUpperCase());
+    });
+
+    it("awards +100 points for case-insensitive match (mixed case)", () => {
+      const { room, guesserId } = startActiveRoom();
+      const mixed = room.secretWord.split("").map((c, i) => i % 2 === 0 ? c.toUpperCase() : c.toLowerCase()).join("");
+      const result = submitGuess(room.code, guesserId, mixed);
+      expect("error" in result).toBe(false);
+      const snap = result as { room: ReturnType<typeof toRoomSnapshot> };
+      expect(snap.room.guesses[0].isCorrect).toBe(true);
+    });
+
+    it("rejects second guess from an already-correct participant", () => {
+      const { room, guesserId } = startActiveRoom();
+      const correct = submitGuess(room.code, guesserId, room.secretWord);
+      expect("error" in correct).toBe(false);
+
+      const duplicate = submitGuess(room.code, guesserId, room.secretWord);
+      expect("error" in duplicate).toBe(true);
+      expect((duplicate as { error: string }).error).toBe("You have already guessed the correct word");
+    });
+
+    it("allows two different guessers to both guess correctly", () => {
+      const { room, participantId } = createRoom("Alice");
+      joinRoom(room.code, "Bob");
+      joinRoom(room.code, "Charlie");
+      startGame(room.code, participantId);
+      const activeRoom = getRoom(room.code)!;
+      const bobId = activeRoom.participants.find((p) => p.name === "Bob")!.id;
+      const charlieId = activeRoom.participants.find((p) => p.name === "Charlie")!.id;
+
+      const r1 = submitGuess(room.code, bobId, activeRoom.secretWord);
+      expect("error" in r1).toBe(false);
+      const r2 = submitGuess(room.code, charlieId, activeRoom.secretWord);
+      expect("error" in r2).toBe(false);
+
+      const snap1 = r1 as { room: ReturnType<typeof toRoomSnapshot> };
+      const snap2 = r2 as { room: ReturnType<typeof toRoomSnapshot> };
+      const g1 = snap1.room.participants.find((p) => p.id === bobId);
+      const g2 = snap2.room.participants.find((p) => p.id === charlieId);
+      expect(g1?.score).toBe(100);
+      expect(g2?.score).toBe(100);
+    });
+
+    it("appends guesses chronologically and maintains order", () => {
+      const { room, guesserId } = startActiveRoom();
+      const activeRoom = getRoom(room.code)!;
+      const guessErr = submitGuess(activeRoom.code, guesserId, "first");
+      expect("error" in guessErr).toBe(false);
+
+      const guessOk = submitGuess(activeRoom.code, guesserId, "second");
+      expect("error" in guessOk).toBe(false);
+
+      const updated = getRoom(activeRoom.code)!;
+      expect(updated.guesses).toHaveLength(2);
+      expect(updated.guesses[0].text).toBe("first");
+      expect(updated.guesses[1].text).toBe("second");
+    });
+
+    it("returns snapshot with guesses array", () => {
+      const { room, guesserId } = startActiveRoom();
+      const result = submitGuess(room.code, guesserId, "guess");
+      expect("error" in result).toBe(false);
+      const snap = result as { room: ReturnType<typeof toRoomSnapshot> };
+      expect(Array.isArray(snap.room.guesses)).toBe(true);
+    });
+
+    it("includes score in participant snapshot", () => {
+      const { room, guesserId } = startActiveRoom();
+      const result = submitGuess(room.code, guesserId, room.secretWord);
+      expect("error" in result).toBe(false);
+      const snap = result as { room: ReturnType<typeof toRoomSnapshot> };
+      const guesser = snap.room.participants.find((p) => p.id === guesserId);
+      expect(guesser).toHaveProperty("score");
+      expect(typeof guesser?.score).toBe("number");
     });
   });
 });

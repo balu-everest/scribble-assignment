@@ -65,6 +65,7 @@ Submit a guess for the current round. The backend validates, trims, optionally a
 | 400 | `text` is empty or whitespace-only (Zod validation) |
 | 400 | `participantId` not found in room participants |
 | 400 | Participant's role is not `"guesser"` (drawers cannot guess) |
+| 400 | Participant has already guessed the correct word this round |
 | 404 | Room code not found |
 | 409 | Room status is not `"active"` (game not in progress) |
 
@@ -158,6 +159,7 @@ The frontend polls `GET /rooms/:code?participantId=<id>` every ~2 seconds while 
 The `POST /rooms/:code/guess` endpoint is called on form submission:
 
 1. Send request with `{ participantId, text }`.
-2. **Auto-retry**: If the request fails (network error), retry up to 3 times with ~1s delay between attempts.
+2. **Auto-retry**: If the request fails with a network error (no response), retry up to 3 times with ~1s delay between attempts. Server validation errors (4xx with JSON body) must not be retried — they are final.
 3. **On success**: Clear the input field. The new guess appears in the guess log on the next poll cycle.
-4. **On final failure**: Show inline error message near the input field. Preserve the typed text for manual retry.
+4. **On validation failure** (4xx response): Display the server's exact error message from the JSON response body inline near the input field. Preserve the typed text.
+5. **On network failure** (all retries exhausted): Display a generic fallback message "Failed to submit guess. Please try again." inline near the input field. Preserve the typed text.

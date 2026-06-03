@@ -6,10 +6,11 @@ import {
   leaveRoomSchema,
   roomCodeParamsSchema,
   roomViewerQuerySchema,
-  startGameSchema
+  startGameSchema,
+  submitGuessSchema
 } from "./schemas.js";
 import type { RoomSnapshot } from "../models/game.js";
-import { createRoom, getRoom, joinRoom, leaveRoom, startGame, toRoomSnapshot } from "../services/roomStore.js";
+import { createRoom, getRoom, joinRoom, leaveRoom, startGame, submitGuess, toRoomSnapshot } from "../services/roomStore.js";
 
 export function createRoomsRouter() {
   const router = Router();
@@ -64,6 +65,34 @@ export function createRoomsRouter() {
           "Participant not found in room": 400,
           "Only the host can start the game": 403,
           "Game has already started": 409
+        };
+        const status = statusMap[err.error] ?? 500;
+        throw new HttpError(status, err.error);
+      }
+
+      const success = result as { room: RoomSnapshot };
+
+      response.json(success);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post("/:code/guess", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const { participantId, text } = submitGuessSchema.parse(request.body);
+      const result = submitGuess(code.toUpperCase(), participantId, text);
+
+      if ("error" in result) {
+        const err = result as { error: string };
+        const statusMap: Record<string, number> = {
+          "Room not found": 404,
+          "Participant not found in room": 400,
+          "Only guessers can submit guesses": 400,
+          "You have already guessed the correct word": 400,
+          "Game is not in progress": 409,
+          "Guess cannot be empty": 400
         };
         const status = statusMap[err.error] ?? 500;
         throw new HttpError(status, err.error);

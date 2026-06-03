@@ -33,13 +33,13 @@ Project already initialized from prior features. No setup tasks needed.
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 Extend `Participant` with `score: number` and add `Guess` interface + `guesses: Guess[]` to `Room` + `RoomSnapshot` in `backend/src/models/game.ts`
-- [ ] T005 Add `submitGuess()` service function to `backend/src/services/roomStore.ts` with validation, trim, case-insensitive matching, +100 scoring, and guess log append
-- [ ] T006 [P] Add backend unit tests for `submitGuess()` in `backend/src/services/roomStore.test.ts` covering case-insensitive matching (upper, lower, mixed case), +100 points on correct guess, +0 on incorrect guess, rejection of empty/whitespace input, and chronological guess log ordering
-- [ ] T007 Add `POST /:code/guess` route handler in `backend/src/api/rooms.ts` and `submitGuessSchema` in `backend/src/api/schemas.ts`
-- [ ] T008 Update `toRoomSnapshot()` in `backend/src/services/roomStore.ts` to include `guesses` array and `score` on each participant
-- [ ] T009 Add `submitGuess()` method (with 3-retry wrapper) to `frontend/src/services/api.ts`
-- [ ] T010 Add `submitGuess()` action and `guesses`/`score` fields to `frontend/src/state/roomStore.ts`
+- [x] T004 Extend `Participant` with `score: number` and add `Guess` interface + `guesses: Guess[]` to `Room` + `RoomSnapshot` in `backend/src/models/game.ts`
+- [x] T005 Add `submitGuess()` service function to `backend/src/services/roomStore.ts` with validation, trim, case-insensitive matching, +100 scoring, and guess log append
+- [x] T006 [P] Add backend unit tests for `submitGuess()` in `backend/src/services/roomStore.test.ts` covering case-insensitive matching (upper, lower, mixed case), +100 points on correct guess, +0 on incorrect guess, rejection of empty/whitespace input, and chronological guess log ordering
+- [x] T007 Add `POST /:code/guess` route handler in `backend/src/api/rooms.ts` and `submitGuessSchema` in `backend/src/api/schemas.ts`
+- [x] T008 Update `toRoomSnapshot()` in `backend/src/services/roomStore.ts` to include `guesses` array and `score` on each participant
+- [x] T009 Add `submitGuess()` method (with 3-retry wrapper) to `frontend/src/services/api.ts`
+- [x] T010 Add `submitGuess()` action and `guesses`/`score` fields to `frontend/src/state/roomStore.ts`
 
 **Checkpoint**: Backend guess endpoint functional with deterministic game logic validated by unit tests. Frontend API wired. User stories can now begin.
 
@@ -51,8 +51,8 @@ Project already initialized from prior features. No setup tasks needed.
 
 **Independent Test**: Open the game as a drawer, click-drag on the canvas to produce visible lines, click Clear to wipe.
 
-- [ ] T011 [US1] Create `DrawingCanvas.tsx` component in `frontend/src/components/DrawingCanvas.tsx` with HTML5 canvas element, mousedown/mousemove/mouseup handlers for freehand drawing, and a Clear button
-- [ ] T012 [US1] Update `GamePage.tsx` in `frontend/src/pages/GamePage.tsx` to conditionally render `<DrawingCanvas />` for the drawer or a styled "[Drawer Name] is drawing..." placeholder for guessers
+- [x] T011 [US1] Create `DrawingCanvas.tsx` component in `frontend/src/components/DrawingCanvas.tsx` with HTML5 canvas element, mousedown/mousemove/mouseup handlers for freehand drawing, and a Clear button
+- [x] T012 [US1] Update `GamePage.tsx` in `frontend/src/pages/GamePage.tsx` to conditionally render `<DrawingCanvas />` for the drawer or a styled "[Drawer Name] is drawing..." placeholder for guessers
 
 **Checkpoint**: US1 functional — drawer draws, guesser sees placeholder.
 
@@ -64,7 +64,7 @@ Project already initialized from prior features. No setup tasks needed.
 
 **Independent Test**: View the game as a guesser, submit a valid guess and see it accepted, then submit empty/whitespace and see descriptive rejection.
 
-- [ ] T013 [US2] Wire `GuessForm.tsx` in `frontend/src/components/GuessForm.tsx` to call `roomStore.submitGuess()` on submit, add inline error message area near the input, clear input on success, preserve text on failure
+- [x] T013 [US2] Wire `GuessForm.tsx` in `frontend/src/components/GuessForm.tsx` to call `roomStore.submitGuess()` on submit, add inline error message area near the input, clear input on success, preserve text on failure
 
 **Checkpoint**: US2 functional — guess submission works end-to-end with validation feedback.
 
@@ -76,7 +76,7 @@ Project already initialized from prior features. No setup tasks needed.
 
 **Independent Test**: Submit a guess as a guesser, then observe all participant screens update with the new guess within a few seconds.
 
-- [ ] T014 [US3] Update `ResultPanel.tsx` in `frontend/src/components/ResultPanel.tsx` to read `guesses` from room state and render them chronologically (oldest-first) with guesser name, text, timestamp, and a "✓ Correct!" indicator for correct guesses
+- [x] T014 [US3] Update `ResultPanel.tsx` in `frontend/src/components/ResultPanel.tsx` to read `guesses` from room state and render them chronologically (oldest-first) with guesser name, text, timestamp, and a "✓ Correct!" indicator for correct guesses
 
 **Checkpoint**: US3 functional — guess log visible and updating on all screens.
 
@@ -88,7 +88,7 @@ Project already initialized from prior features. No setup tasks needed.
 
 **Independent Test**: Submit the secret word (case-insensitively) and observe the scoreboard update with +100 points on all participant screens.
 
-- [ ] T015 [US4] Update `Scoreboard.tsx` in `frontend/src/components/Scoreboard.tsx` to read `participants` from room state and render each player's name and score, sorted descending by score
+- [x] T015 [US4] Update `Scoreboard.tsx` in `frontend/src/components/Scoreboard.tsx` to read `participants` from room state and render each player's name and score, sorted descending by score
 
 **Checkpoint**: US4 functional — scoring and scoreboard work end-to-end.
 
@@ -98,7 +98,7 @@ Project already initialized from prior features. No setup tasks needed.
 
 **Purpose**: Verify everything works together and all quality gates pass.
 
-- [ ] T016 Run verification: `cd backend && npx tsc --noEmit`, `cd frontend && npx tsc -b`, `cd backend && npm test`, `cd frontend && npm test`
+- [x] T016 Run verification: `cd backend && npx tsc --noEmit`, `cd frontend && npx tsc -b`, `cd backend && npm test`, `cd frontend && npm test`
 - [ ] T017 Multi-tab manual test: drawer draws, guesser sees placeholder, guess submit/reject works, guess log updates on all screens, correct guess awards 100 points on scoreboard, case-insensitive matching verified for all casing variations
 
 ---

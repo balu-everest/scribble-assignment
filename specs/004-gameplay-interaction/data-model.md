@@ -58,13 +58,14 @@
 | `text` (guess) | Must contain non-whitespace characters | "Guess cannot be empty" |
 | Room status (guess) | Must be `"active"` | "Game is not in progress" |
 | `participantId` (guess) | Must have role `"guesser"` | "Only guessers can submit guesses" |
+| `participantId` (guess) | Must not have already guessed correctly this round | "You have already guessed the correct word" |
 
 ## Scoring Rules
 
 1. A guess is "correct" if `guess.text.toLowerCase() === secretWord.toLowerCase()`.
 2. On a correct guess, the guesser's `score` is incremented by exactly 100.
 3. Incorrect guesses award 0 points.
-4. All guessers who submit the correct word receive 100 points (no deduplication — each correct submission awards points).
+4. Once a participant has submitted a correct guess, any further guess submissions from that participant are rejected with `400 "You have already guessed the correct word"`.
 5. The drawer does not receive points when a guesser guesses correctly.
 6. Scores are tracked for the duration of the game and reset when a new room is created.
 
@@ -76,21 +77,24 @@ Room Created (status: "lobby")
   ▼
 Game Started (status: "active", roles assigned, secretWord set)
   │
-  ├── Guesser submits guess ──────────────────────────────────────┐
+  ├── Guesser submits guess ───────────────────────────────────────┐
   │   │                                                            │
-  │   ├── text.trim() === "" → reject (400 error, descriptive msg) │
-  │   │                                                            │
-  │   ├── text !== secretWord (case-insensitive)                    │
-  │   │   → Append Guess{isCorrect: false} to guesses[]            │
-  │   │   → score unchanged                                        │
+  │   ├── guesser already has a correct guess in guesses[]          │
+  │   │   → reject (400 "You have already guessed the correct word")│
   │   │                                                             │
+  │   ├── text.trim() === "" → reject (400 error, descriptive msg)  │
+  │   │                                                             │
+  │   ├── text !== secretWord (case-insensitive)                    │
+  │   │   → Append Guess{isCorrect: false} to guesses[]             │
+  │   │   → score unchanged                                         │
+  │   │                                                              │
   │   └── text === secretWord (case-insensitive)                    │
   │       → Append Guess{isCorrect: true} to guesses[]              │
-  │       → guesser.score += 100                                   │
-  │                                                                 │
-  └── All participants poll GET /rooms/:code                        │
-      → Response includes updated guesses[] and participants[].score │
-                                                                     │
+  │       → guesser.score += 100                                    │
+  │                                                                  │
+  └── All participants poll GET /rooms/:code                         │
+      → Response includes updated guesses[] and participants[].score  │
+                                                                       │
   [Future] Round End (out of scope for this feature)
 ```
 
