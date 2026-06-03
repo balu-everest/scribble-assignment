@@ -81,14 +81,12 @@ backend/
 
 frontend/
 ├── src/
-│   ├── components/
-│   │   └── LobbyPage.tsx  # Extend: auto-poll, host-gated Start Game
 │   ├── state/
 │   │   └── roomStore.ts   # Extend: auto-polling with setInterval
 │   ├── services/
 │   │   └── api.ts         # Extend: leaveRoom endpoint
 │   └── pages/
-│       └── LobbyPage.tsx  # Extend: leave button, auto-poll
+│       └── LobbyPage.tsx  # Extend: auto-poll, host-gated Start Game, leave button
 ```
 
 **Structure Decision**: Monorepo with separate `backend/` and `frontend/` directories — matches existing project layout exactly. No shared package creation needed; types are duplicated between frontend and backend per existing convention.
