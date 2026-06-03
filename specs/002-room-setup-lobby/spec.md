@@ -8,6 +8,13 @@
 
 **Input**: User description: "Implement Scenario 1 — Room Setup & Lobby. Requirements: 1. Host Tracking, 2. Strict Validation, 3. Room Isolation, 4. Auto-Polling, 5. Host Gating."
 
+## Clarifications
+
+### Session 2026-06-03
+
+- Q: Can players voluntarily leave a room? → A: Yes, all players (including host) can leave via a "Leave Room" button. Leaving updates the participant list for remaining players. If the host leaves, host transfers to the player who has been in the room the longest (same as disconnect behavior).
+- Q: How should case sensitivity work for room codes and player names? → A: Room codes are case-insensitive (stored uppercase canonical form). Player names are case-insensitive for uniqueness checks but preserve the display casing as entered.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Create a Game Room (Priority: P1)
@@ -40,6 +47,8 @@ A player wants to join a friend's game. They enter the room code provided by the
 2. **Given** a player enters a room code that does not match any existing room, **When** they attempt to join, **Then** they receive a clear error message that the room was not found.
 3. **Given** a player enters only whitespace as their display name or room code, **When** they attempt to join, **Then** they receive a clear error message, and they are not added to any room.
 4. **Given** a player enters a display name that is already taken in the target room, **When** they attempt to join, **Then** they receive a clear error message that the name is already in use, and they are not added.
+5. **Given** an existing room with code "ABC123", **When** a player enters "abc123" (lowercase) and submits, **Then** they are added to the room successfully, demonstrating case-insensitive code matching.
+6. **Given** an existing room with a player named "Alice", **When** a second player enters the name "alice" (lowercase) and attempts to join, **Then** they receive an error that the name is already in use.
 
 ---
 
@@ -81,20 +90,21 @@ The host of the room sees a "Start Game" button in the lobby. The button is visu
 - What happens when a player attempts to join a room using a room code that contains leading/trailing whitespace? The system trims the input and processes it normally.
 - How does the system handle a player who enters a 200-character display name? The system enforces a reasonable length limit (e.g., 20 characters) and rejects names exceeding it with a descriptive error.
 - What happens when a player attempts to create a room while already in one? The system handles gracefully — either prevents creating a new room while in one, or creates the new room and leaves the old one.
-- What happens to the lobby if the host closes their browser or disconnects? The room remains active. The player who joined earliest becomes the new host. If no other players are in the room, the room is eventually cleaned up.
+- What happens to the lobby if the host closes their browser or disconnects? The room remains active. The player who has been in the room the longest (after the host) becomes the new host. If no other players are in the room, the room is eventually cleaned up.
+- What happens when a player voluntarily leaves a room? Any player (including host) can click a "Leave Room" button to depart. The participant list updates for remaining players. If the host leaves, host transfers to the longest-tenured remaining player. If the last player leaves, the room is eventually cleaned up.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
 - **FR-001**: System MUST allow a player to create a new game room by providing a display name, and MUST designate that player as the host of the room.
-- **FR-002**: System MUST generate a unique, non-guessable room code for each new room (e.g., 6-character uppercase alphanumeric).
+- **FR-002**: System MUST generate a unique, non-guessable room code for each new room (e.g., 6-character uppercase alphanumeric). Room codes MUST be treated case-insensitively for matching and stored in uppercase canonical form.
 - **FR-003**: System MUST allow a player to join an existing room by providing a room code and a display name.
 - **FR-004**: System MUST trim leading and trailing whitespace from all player names and room codes before processing.
 - **FR-005**: System MUST reject empty or whitespace-only player names with a clear, descriptive error message.
 - **FR-006**: System MUST reject empty or whitespace-only room codes with a clear, descriptive error message.
 - **FR-007**: System MUST reject join attempts for non-existent room codes with a clear error message.
-- **FR-008**: System MUST enforce unique display names within a room — no two players in the same room may share the same trimmed name.
+- **FR-008**: System MUST enforce unique display names within a room — no two players in the same room may share the same trimmed name. Name uniqueness MUST be case-insensitive (e.g., "Bob" and "bob" are considered duplicates).
 - **FR-009**: System MUST completely isolate room data structures so that players, state, and operations in one room never affect another room.
 - **FR-010**: System MUST expose a lobby endpoint that returns the current participant list for a given room, including which player is the host.
 - **FR-011**: Frontend MUST poll the lobby endpoint every ~2 seconds while a player is in the lobby to keep the participant list synchronized.
@@ -104,7 +114,7 @@ The host of the room sees a "Start Game" button in the lobby. The button is visu
 
 ### Key Entities *(include if feature involves data)*
 
-- **Room**: A discrete game session identified by a unique 6-character code. Contains a list of players and a reference to the host player. Each room is fully isolated in its own data structure.
+- **Room**: A discrete game session identified by a unique 6-character alphanumeric code (case-insensitive, stored uppercase). Contains a list of players and a reference to the host player. Each room is fully isolated in its own data structure.
 - **Player**: A participant in a room, identified by their trimmed display name. Has a role designation (host or non-host). Players are unique by name within a room.
 
 ## Success Criteria *(mandatory)*
@@ -120,9 +130,9 @@ The host of the room sees a "Start Game" button in the lobby. The button is visu
 
 ## Assumptions
 
-- Room codes are 6-character uppercase alphanumeric strings, auto-generated by the backend.
+- Room codes are 6-character uppercase alphanumeric strings, auto-generated by the backend. Room code matching is case-insensitive (input is uppercased before comparison).
 - Maximum display name length is 20 characters.
 - The frontend uses short-polling (HTTP GET) every ~2 seconds — no WebSocket or push technology.
-- If the host disconnects, the player who joined the room earliest (after the host) is automatically promoted to host. If no other players remain, the room becomes orphaned and can be cleaned up.
+- If the host disconnects or voluntarily leaves, the player who has been in the room the longest (after the host) is automatically promoted to host. If no other players remain, the room becomes orphaned and can be cleaned up.
 - All data is stored in-memory on the backend; no persistence is required.
 - No authentication or user accounts exist — players are identified solely by their display name within a room session.
