@@ -8,6 +8,12 @@
 
 **Input**: User description: "Implement Scenario 4 — Result, Restart & Final Validation. Requirements to specify: 1. Game Over Trigger & State Transition: When the secret word is correctly guessed (or the core gameplay condition is met from Scenario 3), the backend room status must transition from 'active' to 'result'. 2. Result Screen UI: The ~2-second frontend polling loop must detect the 'result' status and automatically route all participants to a dedicated Result Screen. This screen must show the final scoreboard with all players' accumulated scores and clearly highlight the winner. 3. Host-Gated Restart Endpoint: Create a backend endpoint (e.g., POST /rooms/:code/restart) restricted exclusively to the host. When called, it must reset the room status back to 'lobby', clear out the old guess history log array, and reset all player scores back to 0. 4. Synchronized Return to Lobby: The frontend polling loop must detect when the room status switches back to 'lobby' and automatically route all participants back to the Lobby screen simultaneously. 5. Persistent Player List & State Cleanliness: The restart routine must preserve the existing list of joined players in the room (no one should be kicked out or forced to re-join). Additionally, ensure the local canvas surface on the drawer's end is explicitly wiped blank upon returning to the lobby so no leftover drawings persist."
 
+## Clarifications
+
+### Session 2026-06-03
+
+- Q: What should non-host participants see on the Result Screen regarding the restart action? → A: Non-host sees a message like "Waiting for host to restart the game..." with no interactive button or control.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Correct Guess Ends the Game and Shows Results (Priority: P1)
@@ -58,6 +64,7 @@ As the host of a room on the Result Screen, I want to restart the game with a si
 3. **Given** a successful restart, **When** any player in the room polls for room state, **Then** they receive 'lobby' status, an empty guess log, and all player scores reset to 0.
 4. **Given** a successful restart, **When** a player polls for room state, **Then** the participant list remains unchanged — no players are removed or need to re-join.
 5. **Given** a room in 'lobby' or 'active' state, **When** the host attempts to trigger a restart, **Then** the request is rejected as restart is only valid from the 'result' state.
+6. **Given** a non-host participant viewing the Result Screen, **When** the screen loads, **Then** they see a non-interactive message indicating the host will restart the game, with no restart button or control visible.
 
 ---
 
@@ -99,6 +106,7 @@ As a participant (not the host) on the Result Screen, I want to be automatically
 - **FR-011**: Upon successful restart, the system MUST reset all player scores to 0.
 - **FR-012**: Upon successful restart, the system MUST preserve the existing player/participant list — no participants are removed, and their names and identifiers remain unchanged.
 - **FR-013**: Upon returning to the Lobby screen after a restart, the canvas drawing surface (on the drawer's client) MUST be wiped completely blank, removing any drawings from the previous round.
+- **FR-014**: The Result Screen MUST display a non-interactive message (e.g., "Waiting for host to restart the game...") to all non-host participants, indicating that the host controls the restart action. The restart button or control MUST only be visible and interactive for the host.
 
 ### Key Entities *(include if feature involves data)*
 
