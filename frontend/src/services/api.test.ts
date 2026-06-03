@@ -20,7 +20,7 @@ describe("api service", () => {
     await api.createRoom("Alice");
 
     expect(fetch).toHaveBeenCalledWith(
-      expect.stringContaining("/rooms"),
+      "http://localhost:3001/rooms",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ playerName: "Alice" }),
@@ -41,7 +41,7 @@ describe("api service", () => {
     await api.fetchRoom("XYZW", "p1");
 
     expect(fetch).toHaveBeenCalledWith(
-      expect.stringContaining("/rooms/XYZW?participantId=p1"),
+      "http://localhost:3001/rooms/XYZW?participantId=p1",
       expect.anything()
     );
   });

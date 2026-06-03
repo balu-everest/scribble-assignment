@@ -28,9 +28,9 @@ description: "Task list for fixing the default API base URL bug"
 
 **Purpose**: Fix the default API base URL and tighten tests
 
-- [ ] T001 [US1] Change default `API_BASE_URL` in `frontend/src/services/api.ts:22` from `"http://localhost:3001/bug"` to `"http://localhost:3001"`
-- [ ] T002 [US1] Update test URL assertions in `frontend/src/services/api.test.ts` to use exact URL matching instead of `expect.stringContaining()`
-- [ ] T003 [P] [US1] Run TypeScript compiler and frontend tests to verify no regressions
+- [X] T001 [US1] Change default `API_BASE_URL` in `frontend/src/services/api.ts:22` from `"http://localhost:3001/bug"` to `"http://localhost:3001"`
+- [X] T002 [US1] Update test URL assertions in `frontend/src/services/api.test.ts` to use exact URL matching instead of `expect.stringContaining()`
+- [X] T003 [P] [US1] Run TypeScript compiler and frontend tests to verify no regressions
 
 ---
 
