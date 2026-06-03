@@ -89,6 +89,36 @@ class RoomStore {
     return response;
   }
 
+  async startGame() {
+    if (!this.state.room || !this.state.participantId) {
+      return;
+    }
+
+    const response = await this.withLoading(() => api.startGame(this.state.room!.code, this.state.participantId!));
+    this.setRoomSnapshot(response.room);
+    return response.room;
+  }
+
+  async submitGuess(text: string) {
+    if (!this.state.room || !this.state.participantId) {
+      throw new Error("Not in a room");
+    }
+
+    const response = await api.submitGuess(this.state.room.code, this.state.participantId, text);
+    this.setRoomSnapshot(response.room);
+    return response.room;
+  }
+
+  async restartRoom() {
+    if (!this.state.room || !this.state.participantId) {
+      throw new Error("Not in a room");
+    }
+
+    const response = await this.withLoading(() => api.restartRoom(this.state.room!.code, this.state.participantId!));
+    this.setRoomSnapshot(response.room);
+    return response.room;
+  }
+
   async fetchRoom() {
     if (!this.state.room) {
       return null;
@@ -97,6 +127,23 @@ class RoomStore {
     const response = await api.fetchRoom(this.state.room.code, this.state.participantId ?? undefined);
     this.setRoomSnapshot(response.room);
     return response.room;
+  }
+
+  clearRoom() {
+    this.setState({
+      room: null,
+      participantId: null,
+      error: null
+    });
+  }
+
+  async leaveRoom() {
+    if (!this.state.room || !this.state.participantId) {
+      return;
+    }
+
+    await api.leaveRoom(this.state.room.code, this.state.participantId);
+    this.clearRoom();
   }
 }
 

@@ -1,15 +1,34 @@
 import { z } from "zod";
 
+const nameValidation = z.string().trim().min(1, "Name cannot be empty").max(20, "Name must be 20 characters or less");
+
 export const createRoomSchema = z.object({
-  playerName: z.string().optional()
+  playerName: nameValidation.optional()
 });
 
 export const joinRoomSchema = z.object({
-  playerName: z.string().optional()
+  playerName: nameValidation.optional()
 });
 
 export const roomCodeParamsSchema = z.object({
-  code: z.string()
+  code: z.string().trim().min(1, "Room code cannot be empty")
+});
+
+export const leaveRoomSchema = z.object({
+  participantId: z.string().min(1, "Participant ID is required")
+});
+
+export const submitGuessSchema = z.object({
+  participantId: z.string().uuid(),
+  text: z.string().min(1, "Guess cannot be empty")
+});
+
+export const startGameSchema = z.object({
+  participantId: z.string().uuid()
+});
+
+export const restartRoomSchema = z.object({
+  participantId: z.string().uuid()
 });
 
 export const roomViewerQuerySchema = z.object({

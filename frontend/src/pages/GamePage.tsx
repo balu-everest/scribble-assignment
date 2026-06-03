@@ -1,14 +1,16 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../components/Card";
+import { DrawingCanvas } from "../components/DrawingCanvas";
 import { GuessForm } from "../components/GuessForm";
 import { ResultPanel } from "../components/ResultPanel";
 import { RoomCodeBadge } from "../components/RoomCodeBadge";
 import { Scoreboard } from "../components/Scoreboard";
-import { useRoomState } from "../state/roomStore";
+import { useRoomState, useRoomStore } from "../state/roomStore";
 
 export function GamePage() {
   const navigate = useNavigate();
+  const roomStore = useRoomStore();
   const { room, participantId } = useRoomState();
 
   useEffect(() => {
@@ -22,6 +24,7 @@ export function GamePage() {
   }
 
   const viewer = room.participants.find((participant) => participant.id === participantId) ?? null;
+  const drawer = room.participants.find((p) => p.role === "drawer") ?? null;
 
   return (
     <section className="panel game-page">
@@ -41,9 +44,13 @@ export function GamePage() {
 
         <div className="game-page__main">
           <Card title="Canvas">
-            <div className="canvas-placeholder" style={{ minHeight: '500px', backgroundColor: '#ffffff', border: '1px solid #e5e7eb' }}>
-              Waiting for drawer...
-            </div>
+            {viewer?.role === "drawer" ? (
+              <DrawingCanvas />
+            ) : (
+              <div className="canvas-placeholder">
+                {drawer ? `${drawer.name} is drawing...` : "Waiting for the drawer to draw..."}
+              </div>
+            )}
           </Card>
         </div>
 
@@ -55,11 +62,31 @@ export function GamePage() {
                 <dd>{viewer?.name ?? "Unknown player"}</dd>
               </div>
               <div>
+                <dt>Role</dt>
+                <dd>{viewer?.role === "drawer" ? "Drawer" : "Guesser"}</dd>
+              </div>
+              <div>
                 <dt>Status</dt>
                 <dd>Playing</dd>
               </div>
             </dl>
           </Card>
+
+          {viewer?.role === "drawer" && room.secretWord && (
+            <Card title="Secret Word">
+              <p style={{ fontSize: "1.5rem", fontWeight: "bold", textAlign: "center" }}>
+                {room.secretWord}
+              </p>
+            </Card>
+          )}
+
+          {viewer?.role === "guesser" && drawer && (
+            <Card title="Drawer">
+              <p style={{ textAlign: "center" }}>
+                <strong>{drawer.name}</strong> is drawing
+              </p>
+            </Card>
+          )}
 
           <Card title="Your Guess">
             <GuessForm />
@@ -68,7 +95,14 @@ export function GamePage() {
       </div>
 
       <div className="button-row">
-        <button className="button button--secondary" onClick={() => navigate("/lobby")}>
+        <button className="button button--secondary" onClick={async () => {
+          try {
+            await roomStore.leaveRoom();
+          } catch {
+            // Error already set in store state
+          }
+          navigate("/");
+        }}>
           Exit Game
         </button>
       </div>

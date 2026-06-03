@@ -12,7 +12,7 @@ describe("api service", () => {
       json: () =>
         Promise.resolve({
           participantId: "p1",
-          room: { code: "ABCD", status: "lobby", participants: [] },
+          room: { code: "ABCD", status: "lobby", participants: [], hostId: "p1" },
         }),
     };
     vi.mocked(fetch).mockResolvedValue(mockResponse as unknown as Response);
@@ -20,7 +20,7 @@ describe("api service", () => {
     await api.createRoom("Alice");
 
     expect(fetch).toHaveBeenCalledWith(
-      expect.stringContaining("/rooms"),
+      "http://localhost:3001/rooms",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ playerName: "Alice" }),
@@ -33,7 +33,7 @@ describe("api service", () => {
       ok: true,
       json: () =>
         Promise.resolve({
-          room: { code: "XYZW", status: "lobby", participants: [] },
+          room: { code: "XYZW", status: "lobby", participants: [], hostId: "p1" },
         }),
     };
     vi.mocked(fetch).mockResolvedValue(mockResponse as unknown as Response);
@@ -41,8 +41,50 @@ describe("api service", () => {
     await api.fetchRoom("XYZW", "p1");
 
     expect(fetch).toHaveBeenCalledWith(
-      expect.stringContaining("/rooms/XYZW?participantId=p1"),
+      "http://localhost:3001/rooms/XYZW?participantId=p1",
       expect.anything()
+    );
+  });
+
+  it("startGame sends POST to /rooms/:code/start with participantId in body", async () => {
+    const mockResponse = {
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          room: { code: "ABCD", status: "active", participants: [], hostId: "p1", drawerId: "p1", secretWord: "rocket" },
+        }),
+    };
+    vi.mocked(fetch).mockResolvedValue(mockResponse as unknown as Response);
+
+    await api.startGame("ABCD", "p1");
+
+    expect(fetch).toHaveBeenCalledWith(
+      "http://localhost:3001/rooms/ABCD/start",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ participantId: "p1" }),
+      })
+    );
+  });
+
+  it("leaveRoom sends PATCH to /rooms/:code/leave with participantId in body", async () => {
+    const mockResponse = {
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          room: { code: "ABCD", status: "lobby", participants: [], hostId: null },
+        }),
+    };
+    vi.mocked(fetch).mockResolvedValue(mockResponse as unknown as Response);
+
+    await api.leaveRoom("ABCD", "p1");
+
+    expect(fetch).toHaveBeenCalledWith(
+      "http://localhost:3001/rooms/ABCD/leave",
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({ participantId: "p1" }),
+      })
     );
   });
 });
