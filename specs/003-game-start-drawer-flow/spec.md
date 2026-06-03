@@ -8,6 +8,12 @@
 
 **Input**: User description: "Implement Scenario 2 — Game Start & Drawer Flow. Requirements: 1. Transition Out of Lobby, 2. Routing via Polling, 3. Player Name Validation Re-enforcement, 4. Role & Word Assignment, 5. Viewer-Specific Responses (Security). Out of Scope: No multi-round logic, no drawer rotation, no round timers."
 
+## Clarifications
+
+### Session 2026-06-03
+
+- Q: Should the room snapshot reveal all players' roles to everyone, or only each player's own role? → A: All players see every participant's role (drawer is publicly known).
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Host Starts the Game (Priority: P1)
@@ -52,8 +58,8 @@ As a player in an active game, I want to see my assigned role (drawer or guesser
 
 **Acceptance Scenarios**:
 
-1. **Given** a game that has just started, **When** the drawer requests the current room state, **Then** they see their role as 'drawer' and the secret word is visible in the response.
-2. **Given** a game that has just started, **When** a guesser requests the current room state, **Then** they see their role as 'guesser' and the secret word is NOT visible in the response.
+1. **Given** a game that has just started, **When** the drawer requests the current room state, **Then** they see their role as 'drawer', the secret word is visible, and they can see all other participants' roles.
+2. **Given** a game that has just started, **When** a guesser requests the current room state, **Then** they see their role as 'guesser', they can see the drawer's identity and role, but the secret word is NOT visible in the response.
 3. **Given** a game with exactly two players, **When** the game starts, **Then** the host is designated as drawer and the other player is designated as guesser.
 
 ---
@@ -95,7 +101,7 @@ As the system, I want to ensure that all player names stored during active gamep
 - **FR-010**: The host (or first player in the room) MUST be designated as the drawer upon game start.
 - **FR-011**: Upon game start, the system MUST deterministically select a secret word from the predefined list: [rocket, pizza, castle, guitar, sunflower].
 - **FR-012**: The secret word MUST only be visible to the drawer. Guessers MUST NOT be able to see the secret word through any means.
-- **FR-013**: The system MUST return each player's assigned role (drawer or guesser) in the room state response visible to that player.
+- **FR-013**: The system MUST include each player's assigned role (drawer or guesser) in the room state response. All participants' roles MUST be visible to all players in the room (roles are public).
 
 ### Key Entities *(include if feature involves data)*
 
